@@ -20,10 +20,6 @@ ggplot(dat, aes(Year, anomaly, color=model)) +
   geom_line() + 
   facet_wrap(~Era, scales="free_x")
 
-ggplot(filter(dat, Era=="preindustrial"), aes(Year, anomaly, color=model)) +
-  theme_bw() +
-  geom_line()
-
 # now load ERSSTv5 for the same box, and calculate annual anomalies
 
 # 50º-60ºN, 210º-230ºE, 1854-present
@@ -70,27 +66,28 @@ image(x,y,z, col=tim.colors(64), xlim=c(190,240), ylim=c(40,66))
 contour(x, y, z, add=T) 
 map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
 
-
 # get anomaly for 1981:2010
 yr <- as.numeric(as.character(years(d)))
-m <- months(d[yr %in% 1981:2010])
-# m <- months(d)
-f <- function(x) tapply(x, m, mean)
-mu <- apply(SST[yr %in% 1981:2010,], 2, f)	# Compute monthly means for each time series (location)
-# mu <- apply(SST, 2, f)	
 
-mu <- mu[rep(1:12, length(d)/12),] 
+weights <-  sqrt(cos(lat*pi/180))
+ff <- function(x) weighted.mean(x, w=weights, na.rm=T)
+weighted.mean <- apply(SST, 1, ff)
 
-anom <- rowMeans(SST - mu, na.rm=T)   # Compute matrix of anomalies!
+annual.sst <- tapply(weighted.mean, yr, mean)
 
-annual <- tapply(anom, yr, mean)
-annual <- annual[names(annual) >=1900]
-plot(names(annual), annual, type="o", pch=19)
+mu <- mean(annual.sst[names(annual.sst) %in% 1981:2010])
+sd <- sd(annual.sst[names(annual.sst) %in% 1981:2010])
+
+annual.anomaly <- (annual.sst - mu)/sd
+
+annual.anomaly <- annual.anomaly[names(annual.anomaly) >=1900]
+
+plot(names(annual.anomaly), annual.anomaly, type="o", pch=19)
 
 # now compare thes observations with each model!
 compare.dat <- dat %>%
-  filter(Era=="present", Year <=2018) %>%
-  mutate(observed=rep(annual[names(annual) %in% 1987:2018],5))
+  filter(Era=="present", Year <=2005) %>%
+  mutate(observed=rep(annual.anomaly[names(annual.anomaly) %in% 1987:2005],5))
 
 ggplot(compare.dat, aes(observed, anomaly)) +
   theme_bw() +
@@ -98,7 +95,7 @@ ggplot(compare.dat, aes(observed, anomaly)) +
   facet_wrap(~model)
 
 model.means <- tapply(compare.dat$anomaly, compare.dat$model, mean)
-observed.mean <- mean(annual[names(annual) %in% 1987:2018])
+observed.mean <- mean(annual.anomaly[names(annual.anomaly) %in% 1987:2005])
 
 bias <- model.means - observed.mean 
 
@@ -122,7 +119,29 @@ for(i in 1:length(mods)){
   
   envelope$debiased.3.yr[envelope$model==mods[i]] <- zoo::rollmean(temp$debiased, 3, fill=NA)
   
+  envelope$anomaly.3.yr[envelope$model==mods[i]] <- zoo::rollmean(temp$anomaly, 3, fill=NA)
 }
 
+fmin <- function(x) min(x, na.rm=T)
+fmax <- function(x) max(x, na.rm=T)
 
-# 
+ranges <- data.frame(min.anomaly=fmin(envelope$anomaly),
+                     max.anomaly=fmax(envelope$anomaly),
+                     min.anomaly3=fmin(envelope$anomaly.3.yr),
+                     max.anomaly3=fmax(envelope$anomaly.3.yr),
+                     min.debiased=fmin(envelope$debiased),
+                     max.debiased=fmax(envelope$debiased),
+                     min.debiased3=fmin(envelope$debiased.3.yr),
+                     max.debiased3=fmax(envelope$debiased.3.yr))
+
+# now plot...
+annual <- data.frame(year=names(annual.anomaly), anomaly=annual.anomaly, 
+                     anomaly3=zoo::rollmean(annual.anomaly, 3, fill=NA))
+annual$year <- as.numeric(as.character(annual$year))
+ggplot(filter(annual, year >= 1965), aes(year, anomaly)) +
+  theme_bw() +
+  geom_line() +
+  geom_point() +
+  geom_line(aes(year, anomaly3), color="red") +
+  geom_hline(yintercept = c(ranges$min.debiased, ranges$max.debiased), lty=2) +
+  geom_hline(yintercept = c(ranges$min.debiased3, ranges$max.debiased3), lty=2, color="red")
