@@ -89,7 +89,7 @@ map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
 And here are the annual anonamlies wrt 1981-2010. Just to make sure that I'm not making any errors, I'll outline the steps I'm using:
 
 1. Calculate annual mean SST for each cell.
-2. Change these into anomalies: subtract 1981-2010 mean, divide by 1981-2010 sd.
+2. Change these into anomalies: subtract 1981-2010 mean, divide by 1900-2018 sd.
 2. Calculate annual mean anomaly for the entire box, weighting each cell by its area.
 
 The resulting time series looks like this:
@@ -105,7 +105,10 @@ annual.sst <- apply(SST, 2, f) # annual mean for each cell
 
 # get anomaly for each cell
 mu <- apply(annual.sst[rownames(annual.sst) %in% 1981:2010,], 2, mean)	# Compute monthly means for each cell during 1981:2010
-sd <- apply(annual.sst[rownames(annual.sst) %in% 1981:2010,], 2, sd)
+
+# change suggested by Nick Bond - using SD for the entire time series when calculating anomalies
+# doing this b.c my previous anomalies appear to be too large when compared with Walsh et al. 2018
+sd <- apply(annual.sst[rownames(annual.sst) >= 1900,], 2, sd)
 
 mu <- matrix(mu, nrow=nrow(annual.sst), ncol=length(mu), byrow=T)
 sd <- matrix(sd, nrow=nrow(annual.sst), ncol=length(sd), byrow=T) 
@@ -127,11 +130,7 @@ ggplot(anomaly.plot, aes(year, anomaly, fill=sign)) +
   
 ```
 
-Something is wrong here...the 2013-2016 values are nearly 3, while in Walsh et al. they're ~2. Likewise, the early-1900s minima is nearly -4 in my calculation, but ~ -3 in Walsh et al.
-
-I tried calculating montly anomalies and averaging these into anuual values, as well as re-running the above with ERSST4 (which is what Walsh et al. use). These don't produce results that are much more similar to the results in Walsh et al. Not sure why this is!
-
-Need to figure that out. Going ahead with the comparison to preindustrial simulations.
+Now going ahead with the comparison to preindustrial simulations.
 
 I'm doing this in *two ways*.
 
@@ -220,7 +219,7 @@ month <- "8"
 
 URL <- paste("https://coastwatch.pfeg.noaa.gov/erddap/griddap/nceiErsstv5.nc?sst[(1854-01-01):1:(", year, "-", month, "-01T00:00:00Z)][(0.0):1:(0.0)][(50):1:(60)][(210):1:(230)]", sep="")
 
-download.file(URL, "GOA.box.ersst.latest")
+# download.file(URL, "GOA.box.ersst.latest")
 
 # process
 nc <- nc_open("GOA.box.ersst.latest")
@@ -311,4 +310,25 @@ ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
   ggtitle("Observations v. raw envelope")
 ```
 
-Conclusion: the debiasing is more conservative, presumably because it removes internal variability in the recent observations that is not captured by the preindustrial simulations.
+Conclusion: the debiasing is more conservative, presumably because it removes internal variability in the recent observations that is not captured by the preindustrial simulations. The raw envelope produces a conclusion more similar to Walsh et al., with a single year outside the envelope of preindustrial conditions.
+
+Just to confirm that my treatment of three-year rolling means is appropriate, I'll calculate AR(1) values of each preindustrial simulation. Here are the model AR(1) values for 1987-2005:
+
+```{r}
+
+f <- function(x) ar(x, aic=F, order.max = 1)$ar
+
+model.ar.1 <- tapply(compare.dat$anomaly, compare.dat$model, f)
+
+observed.ar.1 <- f(annual.anomaly[names(annual.anomaly) %in% 1987:2005])
+
+model.ar.1
+```
+
+And the observed AR(1):
+
+```{r}
+observed.ar.1
+```
+
+So it appears that the simulations were extracted as 60-year blocks, with the autocorrelation intact, and so the 3-yr approach that I use is appropriate.
