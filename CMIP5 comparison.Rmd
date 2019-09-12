@@ -298,7 +298,7 @@ ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
 And here is the same plot, using the actual preindustrial envelope, without the debiasing described above. 
 ```{r, fig.height=3, warning=F}
 # compare with non-debiased estimates...
-ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
+ggplot(annual, aes(year, anomaly)) +
   theme_bw() +
   geom_line() +
   geom_point() +
@@ -318,7 +318,7 @@ xtra <- data.frame(year=1880:2040,
 
 annual <- left_join(xtra, annual)
 
-ggplot(annual, aes(year, anomaly)) +
+save.plot <- ggplot(annual, aes(year, anomaly)) +
   theme_bw() +
   geom_line() +
   geom_point() +
@@ -329,7 +329,7 @@ ggplot(annual, aes(year, anomaly)) +
   theme(axis.title.x = element_blank()) +
   ylab("SST anomaly") 
 
-ggsave("GOA sst vs. raw observations.png", width=6, height=3, units="in")
+ggsave(plot=save.plot, device="png", "GOA sst vs. raw observations.png", width=6, height=3, units="in")
 ```
 
 Conclusion: the debiasing is more conservative, presumably because it removes internal variability in the recent observations that is not captured by the preindustrial simulations. The raw envelope produces a conclusion more similar to Walsh et al., with a single year outside the envelope of preindustrial conditions.
@@ -354,3 +354,115 @@ observed.ar.1
 ```
 
 So it appears that the simulations were extracted as 60-year blocks, with the autocorrelation intact, and so the 3-yr approach that I use is appropriate.
+
+Now, out of curiosity, I'll calculate the envelope values as the multi-model mean max/min.
+
+Here are the debiased and raw plots using this approach:
+
+```{r,fig.height=3, warnings=F}
+model.means <- envelope %>%
+  group_by(model) %>%
+  summarize(min.anomaly=fmin(anomaly),
+                     max.anomaly=fmax(anomaly),
+                     min.anomaly3=fmin(anomaly.3.yr),
+                     max.anomaly3=fmax(anomaly.3.yr),
+                     min.debiased=fmin(debiased),
+                     max.debiased=fmax(debiased),
+                     min.debiased3=fmin(debiased.3.yr),
+                     max.debiased3=fmax(debiased.3.yr))
+
+multi.model.mean <- as.data.frame(t(colMeans(model.means[,-1])))
+
+ggplot(annual, aes(year, anomaly)) +
+  theme_bw() +
+  geom_line() +
+  geom_point() +
+  geom_line(aes(year, anomaly3), color=cb[3], size=1) +
+  geom_ribbon(aes(ymin=multi.model.mean$min.debiased, ymax=multi.model.mean$max.debiased), alpha=0.2) +
+  geom_ribbon(aes(ymin=multi.model.mean$min.debiased3, ymax=multi.model.mean$max.debiased3), alpha=0.2, fill=cb[3]) +
+  theme(axis.title.x = element_blank()) +
+  ylab("SST anomaly") +
+  scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
+  ggtitle("Observations v. debiased envelope (multi-model mean)")
+
+ggplot(annual, aes(year, anomaly)) +
+  theme_bw() +
+  geom_line() +
+  geom_point() +
+  geom_line(aes(year, anomaly3), color=cb[3], size=1) +
+  geom_ribbon(aes(ymin=multi.model.mean$min.anomaly, ymax=multi.model.mean$max.anomaly), alpha=0.2) +
+  geom_ribbon(aes(ymin=multi.model.mean$min.anomaly3, ymax=multi.model.mean$max.anomaly3), alpha=0.2, fill=cb[3]) +
+  theme(axis.title.x = element_blank()) +
+  ylab("SST anomaly") +
+  scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
+  ggtitle("Observations v. raw envelope (multi-model mean)")
+```
+ 
+ Try plotting the range of min/max sst values for each model! 
+ 
+```{r, warning=F, fig.height=3}
+model.means <- envelope %>%
+  group_by(model) %>%
+  summarize(min.anomaly=fmin(anomaly),
+                     max.anomaly=fmax(anomaly),
+                     min.anomaly3=fmin(anomaly.3.yr),
+                     max.anomaly3=fmax(anomaly.3.yr),
+                     min.debiased=fmin(debiased),
+                     max.debiased=fmax(debiased),
+                     min.debiased3=fmin(debiased.3.yr),
+                     max.debiased3=fmax(debiased.3.yr))
+
+plot.model.names <- model.means$model[order(-model.means$max.anomaly)]
+
+model.means <- model.means %>%
+  arrange(desc(max.anomaly))
+
+ggplot(annual, aes(year, anomaly)) +
+  theme_bw() +
+  geom_line() +
+  geom_point() +
+  geom_line(aes(year, anomaly3), color=cb[3], size=1) +
+  geom_hline(yintercept=c(model.means$max.anomaly), alpha=1, lty=2) +
+  geom_hline(yintercept=c(model.means$max.anomaly3), alpha=1, lty=2, color=cb[3]) +
+  theme(axis.title.x = element_blank()) +
+  ylab("SST anomaly") +
+  scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
+  ggtitle("Observations v. raw envelope (individual model envelopes)")
+
+# and make a 2-panel version!
+short.list.colors <- cb[c(6,4,2,7,8)]
+
+plot.a <- ggplot(annual, aes(year, anomaly)) +
+  theme_bw() +
+  geom_hline(yintercept=c(model.means$max.anomaly), color=short.list.colors) +
+  geom_line() +
+  geom_point() +
+  theme(axis.title.x = element_blank()) +
+  ylab("SST anomaly") +
+  scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
+  ggtitle("a) Annual SST") 
+
+for(i in 1:nrow(model.means)){
+  plot.a <- plot.a + annotate("text", x=2019, y=-1.5-0.3*i, label=plot.model.names[i], color=short.list.colors[i], adj=1, size=3)
+}
+
+plot.b <- ggplot(annual, aes(year, anomaly3)) +
+  theme_bw() +
+  geom_hline(yintercept=c(model.means$max.anomaly3), color=short.list.colors) +
+  geom_line() +
+  # geom_point() +
+  theme(axis.title.x = element_blank()) +
+  ylab("SST anomaly") +
+  scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
+  ggtitle("b) Three-year running mean SST") 
+
+for(i in 1:nrow(model.means)){
+  plot.b <- plot.b + annotate("text", x=2019, y=-1-0.3*i, label=plot.model.names[i], color=short.list.colors[i], adj=1, size=3)
+}
+
+png("sst anomalies two-panel.png", 10, 3, units="in", res=300)
+ggpubr::ggarrange(plot.a, plot.b)
+dev.off()
+```
+ 
+ 
