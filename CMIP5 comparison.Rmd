@@ -442,13 +442,19 @@ plot.a <- ggplot(annual, aes(year, anomaly)) +
   scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
   ggtitle("a) Annual SST") 
 
+
 for(i in 1:nrow(model.means)){
   plot.a <- plot.a + annotate("text", x=2019, y=-1.5-0.3*i, label=plot.model.names[i], color=short.list.colors[i], adj=1, size=3)
 }
 
+# now drop MRI.CGCM3 as it has unrealistically low AR(1)
+new.means <- model.means[c(1,2,4,5),]
+new.names <- plot.model.names[c(1,2,4,5)]
+new.colors <- short.list.colors[c(1,2,4,5)]
+
 plot.b <- ggplot(annual, aes(year, anomaly3)) +
   theme_bw() +
-  geom_hline(yintercept=c(model.means$max.anomaly3), color=short.list.colors) +
+  geom_hline(yintercept=c(new.means$max.anomaly3), color=new.colors) +
   geom_line() +
   # geom_point() +
   theme(axis.title.x = element_blank()) +
@@ -456,9 +462,10 @@ plot.b <- ggplot(annual, aes(year, anomaly3)) +
   scale_x_continuous(breaks=seq(1900, 2020, 20), lim=c(1900,2020)) +
   ggtitle("b) Three-year running mean SST") 
 
-for(i in 1:nrow(model.means)){
-  plot.b <- plot.b + annotate("text", x=2019, y=-1-0.3*i, label=plot.model.names[i], color=short.list.colors[i], adj=1, size=3)
+for(i in 1:nrow(new.means)){
+  plot.b <- plot.b + annotate("text", x=2019, y=-1.5-0.3*i, label=new.names[i], color=new.colors[i], adj=1, size=3)
 }
+
 
 png("sst anomalies two-panel.png", 10, 3, units="in", res=300)
 ggpubr::ggarrange(plot.a, plot.b)
