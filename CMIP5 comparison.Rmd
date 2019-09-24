@@ -466,10 +466,26 @@ for(i in 1:nrow(new.means)){
   plot.b <- plot.b + annotate("text", x=2019, y=-1.5-0.3*i, label=new.names[i], color=new.colors[i], adj=1, size=3)
 }
 
-
 png("sst anomalies two-panel.png", 10, 3, units="in", res=300)
 ggpubr::ggarrange(plot.a, plot.b)
 dev.off()
+```
+ 
+ Now...look at the % of observations that are outside the preindustrial observations for each model.
+ 
+```{r}
+
+outside.envelope <- matrix(nrow=2, ncol=5)
+dimnames(outside.envelope) <- list(c("annual", "3-yr"), model.means$model)
+
+for(j in 1:nrow(model.means)){
+  
+  outside.envelope[1,j] <- sum(na.omit(annual$anomaly) > model.means$max.anomaly[j])
+  outside.envelope[2,j] <- sum(na.omit(annual$anomaly3) > model.means$max.anomaly3[j])
+  
+}
+
+outside.envelope
 ```
  
  
