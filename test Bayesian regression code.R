@@ -1,7 +1,9 @@
 # step by step
 # fit a linear regression in Stan to evaluate the evidence for changing PDO effects on salmon catches in the GOA
 
-# use raw.dat object from 'data processing.R' 
+# load the raw.dat object from 'PDO and SST regressions.R' 
+
+raw.dat <- read.csv("salmon.and.covariate.data.csv")
 
 library(rstan)
 library(tidyverse)
@@ -11,7 +13,6 @@ library(coda)
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-
 
 linear_regression <- stan_model("regression.mod.stan")
 
@@ -64,7 +65,6 @@ df3 <- data.frame(slope=rstan::extract(fit3, pars="beta"), era="2014-2019")
 # combine and plot
 plot.dat <- rbind(df1, df2, df3)
 
-# set colors
 # set colors
 cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
