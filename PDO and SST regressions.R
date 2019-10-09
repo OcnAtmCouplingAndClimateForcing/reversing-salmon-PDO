@@ -988,3 +988,1320 @@ map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
 
 dev.off()
 
+
+
+
+# png("combined pink 3-yr smoothed winter sst correlations by era.png", 8, 3, units="in", res=300)
+# par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+# 
+# new.col <- tim.colors(64)
+# grays <- c("gray90", "gray89", "gray88",
+#            "gray87","gray86")
+# 
+# new.col[27:36] <- c(grays[5:1], grays[1:5])
+# 
+# lim <- range(winter.pink.65.88, winter.pink.89.13, winter.pink.14.19, na.rm=T)
+# 
+# z <- t(matrix(winter.pink.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x, sst.y, z, add=T, col="grey") 
+# map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+# mtext("Pink v. winter sst 1965-1988")
+# 
+# z <- t(matrix(winter.pink.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x, sst.y, z, add=T, col="grey") 
+# map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+# mtext("Pink v. winter sst 1989-2013")
+# 
+# z <- t(matrix(winter.pink.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x, sst.y, z, add=T, col="grey") 
+# map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+# mtext("Pink v. winter sst 2014-2019")
+# 
+# dev.off()
+
+# # compare odd and even pink for the first two periods
+# winter.pink.odd.65.88 <- winter.pink.even.65.88 <- 
+#   winter.pink.odd.89.13 <- winter.pink.even.89.13 <- NA
+# 
+# # set up odd and even dfs for convenience
+# odd.catch <- mean.catch %>%
+#   filter(ecosystem=="Gulf of Alaska", plot.species=="Pink-odd")
+# 
+# even.catch <- mean.catch %>%
+#   filter(ecosystem=="Gulf of Alaska", plot.species=="Pink-even")
+# 
+# for(j in 1:ncol(win.SST)){
+#   # note that we are using catch year as the nominal year matching the proposed eras
+#   # j <- 1
+#   
+#   yy <- filter(odd.catch, entry.year <= 1987)
+#   xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+#   winter.pink.odd.65.88[j] <- cor(xx, yy$`mean(sc.catch)`)
+#   
+#   yy <- filter(even.catch, entry.year <= 1987)
+#   xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+#   winter.pink.even.65.88[j] <- cor(xx, yy$`mean(sc.catch)`)
+#   
+#   yy <- filter(odd.catch, entry.year %in% 1988:2012)
+#   xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+#   winter.pink.odd.89.13[j] <- cor(xx, yy$`mean(sc.catch)`)
+#   
+#   yy <- filter(even.catch, entry.year %in% 1988:2012)
+#   xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+#   winter.pink.even.89.13[j] <- cor(xx, yy$`mean(sc.catch)`)
+# }
+# 
+# # plot!
+# png("pink odd even winter sst correlations by era.png", 6, 6, units="in", res=300)
+# par(mfrow=c(2,2), mar=c(1,1,1.5,1))
+# 
+# new.col <- tim.colors(64)
+# grays <- c("gray90", "gray89", "gray88",
+#            "gray87","gray86")
+# 
+# new.col[27:36] <- c(grays[5:1], grays[1:5])
+# 
+# lim <- c(-1,1)
+# 
+# z <- t(matrix(winter.pink.odd.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+# map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+# map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+# mtext("Odd year pink", outer=T, cex=1.2, side=2, adj=0.9)
+# mtext("1965-1988", outer=T, cex=1.2, side=3, adj=0.1)
+# 
+# z <- t(matrix(winter.pink.odd.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+# map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+# map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+# map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+# mtext("1989-2013", outer=T, cex=1.2, side=3, adj=0.1)
+# 
+# z <- t(matrix(winter.pink.even.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x, sst.y, z, add=T, col="grey") 
+# map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+# mtext("Even pink v. winter sst 1965-1988")
+# 
+# z <- t(matrix(winter.pink.even.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+# image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+# contour(sst.x, sst.y, z, add=T, col="grey") 
+# map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+# mtext("Even pink v. winter sst 1989-2013")
+# dev.off()
+
+
+########
+# old script
+
+summary <- tapply(dat$catch, list(dat$species, dat$area), mean)
+summary
+
+# identify area-species combinations with mean catches < 100,000 fish
+drop <- summary < 100000                  
+drop # N. Peninsula Coho and Pink and Bristol Bay Pink
+
+# remove these cases
+rm <- intersect(grep("Bris", dat$area), grep("Pink", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("N. Pen", dat$area), grep("Pink", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("N. Pen", dat$area), grep("Coho", dat$species))
+dat <- dat[-rm,]
+
+# log transform and plot!
+dat$log.catch <- log(dat$catch + 1)
+
+ggplot(dat, aes(x=Year, y=detrend(log.catch))) + geom_point() + geom_line() + facet_grid(species ~ area, scales="free_y")
+ggplot(filter(dat, species=="Sockeye"), aes(x=Year, y=log.catch)) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+ggplot(filter(dat, species=="Sockeye"), aes(x=Year, y=detrend(log.catch))) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+
+# let's drop Chignik 2018
+
+rm <- intersect(grep("Chig", dat$area), grep("2018", dat$Year))
+dat <- dat[-rm,]
+
+# and drop chignik 2004 chum, coho, pink; 2005 chum and coho; 1989 chum and pink
+rm <- intersect(grep("Chig", dat$area), grep("1989", dat$Year))
+rm <- intersect(rm, grep("Chum", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Chig", dat$area), grep("1989", dat$Year))
+rm <- intersect(rm, grep("Pink", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Chig", dat$area), grep("2005", dat$Year))
+rm <- intersect(rm, grep("Chum", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Chig", dat$area), grep("2005", dat$Year))
+rm <- intersect(rm, grep("Coho", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Chig", dat$area), grep("2004", dat$Year))
+rm <- intersect(rm, grep("Chum", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Chig", dat$area), grep("2004", dat$Year))
+rm <- intersect(rm, grep("Coho", dat$species))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Chig", dat$area), grep("2004", dat$Year))
+rm <- intersect(rm, grep("Pink", dat$species))
+dat <- dat[-rm,]
+
+# also remove 1989 Kodiak and PWS
+rm <- intersect(grep("Kod", dat$area), grep("1989", dat$Year))
+dat <- dat[-rm,]
+
+rm <- intersect(grep("Prince", dat$area), grep("1989", dat$Year))
+dat <- dat[-rm,]
+
+# and let's add an ecosystem component to allow these to be separated
+dat$ecosystem <- ifelse(dat$area %in% c("Bristol Bay", "N. Peninsula"), "Bering Sea", "Gulf of Alaska")
+
+ggplot(filter(dat, species=="Sockeye", ecosystem=="Gulf of Alaska"), aes(x=Year, y=log.catch)) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+ggplot(filter(dat, species=="Pink", ecosystem=="Gulf of Alaska"), aes(x=Year, y=log.catch)) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+ggplot(filter(dat, species=="Chum", ecosystem=="Gulf of Alaska"), aes(x=Year, y=log.catch)) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+ggplot(filter(dat, species=="Coho", ecosystem=="Gulf of Alaska"), aes(x=Year, y=log.catch)) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+
+# all the above with separate management areas was aimed at portfolio diversity (and still could be useful in that regard!)
+
+
+ggplot(filter(dat, species=="Sockeye"), aes(x=Year, y=detrend(catch))) + geom_point() + geom_line() + facet_wrap( ~ area, scales="free_y")
+
+
+
+# compare sd among areas
+temp <- filter(dat, species=="Sockeye", ecosystem=="Gulf of Alaska")
+sd <- tapply(temp$catch, temp$Year, sd)
+
+plot(1965:2018, sd, type="l")
+
+# get running sd and mean for each area
+temp <- filter(dat, species=="Sockeye")
+
+areas <- unique(temp$area)
+sd <- matrix(nrow=2018-1964, ncol=length(areas))
+colnames(sd) <- areas
+rownames(sd) <- 1965:2018
+
+mu <- sd
+win <- 1974:2018
+
+for(j in 1:ncol(sd)){
+ # j <- 1
+  t.temp <- filter(temp, area==areas[j])
+  # detrend and scale catch
+  t.temp$sc.catch <- scale(detrend(t.temp$catch))
+  
+  for(i in 1:length(win)){
+    # i <- 1
+    sd[(i+9), j] <- sd(t.temp$sc.catch[t.temp$Year %in% (win[i]-9):win[i]], na.rm=T)
+    mu[(i+9), j] <- mean(t.temp$sc.catch[t.temp$Year %in% (win[i]-9):win[i]], na.rm=T)
+  }
+}
+
+# plot by area
+
+bb.sd <- as.data.frame(sd[,1:2])
+bb.sd <- gather(bb.sd)
+bb.sd$year <- row.names(sd)
+bb.sd$area <- "Bering Sea"
+
+goa.sd <- as.data.frame(sd[,3:8])
+goa.sd <- gather(goa.sd)
+goa.sd$year <- row.names(sd)
+goa.sd$area <- "Gulf of Alaska"
+
+sd.plot <- rbind(bb.sd, goa.sd)
+
+ggplot(sd.plot, aes(x=year, y=value)) + geom_point(aes(color=key)) + geom_line(aes(color=key)) + facet_wrap(~area)
+
+#####################
+# bring in SST data #
+#####################
+
+library(ncdf4)
+library(zoo)
+library(gplots)
+library(dplyr)
+library(maps)
+library(mapdata)
+library(chron)
+library(fields)
+
+
+# # download.file("https://coastwatch.pfeg.noaa.gov/erddap/griddap/nceiErsstv4.nc?sst[(1854-01-01):1:(2018-08-01T00:00:00Z)][(0.0):1:(0.0)][(54):1:(62)][(200):1:(226)],ssta[(1854-01-01):1:(2018-08-01T00:00:00Z)][(0.0):1:(0.0)][(54):1:(62)][(200):1:(226)]", "~temp")
+# # load and process SST data
+# nc <- nc_open("~temp")
+# 
+# # extract dates
+# 
+# ncvar_get(nc, "time")   # seconds since 1-1-1970
+# raw <- ncvar_get(nc, "time")
+# h <- raw/(24*60*60)
+# d <- dates(h, origin = c(1,1,1970))
+# 
+# # extract study area
+# # 54-62 deg. N, 200-226 deg. E
+# x <- ncvar_get(nc, "longitude")
+# y <- ncvar_get(nc, "latitude")
+# 
+# SST <- ncvar_get(nc, "sst", verbose = F)
+# 
+# # Change data from a 3-D array to a matrix of monthly data by grid point:
+# # First, reverse order of dimensions ("transpose" array)
+# SST <- aperm(SST, 3:1)  
+# 
+# # Reverse order of latitudes to be increasing for convenience (in later plotting)
+# SST <- SST[,5:1,]  
+# # Also reverse corresponding vector of latitudes
+# y <- rev(y)  
+# # Change to matrix with column for each grid point, rows for monthly means
+# SST <- matrix(SST, nrow=dim(SST)[1], ncol=prod(dim(SST)[2:3]))  
+# 
+# # Keep track of corresponding latitudes and longitudes of each column:
+# lat <- rep(y, length(x))   
+# lon <- rep(x, each = length(y))   
+# dimnames(SST) <- list(as.character(d), paste("N", lat, "E", lon, sep=""))
+# 
+# # plot to check
+# 
+# # need to drop Bristol Bay cells
+# BB <- c("N58E200", "N58E202", "N56E200")
+# SST[,BB] <- NA
+# 
+# # extract winter
+# m <- months(d)
+# yr <- as.numeric(as.character(years(d)))
+# 
+# SST <- SST[m %in% c("Nov", "Dec", "Jan", "Feb", "Mar"),]
+# 
+# d.win <- d[m %in% c("Nov", "Dec", "Jan", "Feb", "Mar")]
+# m <- months(d.win)
+# yr <- as.numeric(as.character(years(d.win)))
+# 
+# # adjust yr so that Nov and Dec correspond with Jan
+# yr[m %in% c("Nov", "Dec")] <- yr[m %in% c("Nov", "Dec")] + 1
+# 
+# mu <- rowMeans(SST, na.rm=T)
+
+sst <- tapply(mu, yr, mean)
+plot(names(sst), sst, type="l")
+sst.3 <- rollmean(sst,3,fill=NA)
+plot(names(sst.3), sst.3, type="l")
+
+# split out odd and even pink
+dat$odd.even <- ifelse(even(dat$Year)==TRUE, "even", "odd")
+dat$plot.species <- ifelse(dat$species=="Pink", paste(dat$species, dat$odd.even, sep="-"), dat$species)
+
+
+# scale catch
+sum.catch <- dat %>%
+  group_by(plot.species, area) %>%
+  summarise(mean(catch), sd(catch)) 
+
+dat <- left_join(sum.catch, dat)
+
+dat$sc.catch <- (dat$catch-dat$`mean(catch)`)/dat$`sd(catch)`
+
+# and plot these time series!
+area.plot <- dat %>%
+  filter(ecosystem=="Gulf of Alaska")
+
+ggplot(area.plot, aes(Year, sc.catch, color=area)) +
+  theme_bw() +
+  geom_line() + geom_point() +
+  facet_wrap(~plot.species, scales="free_y")
+
+
+
+# get mean catch by plot.species and area!
+mean.catch <- dat %>%
+  group_by(ecosystem, plot.species, Year) %>%
+  summarize(mean(sc.catch))
+
+mean.catch$plot.catch <- as.numeric(mean.catch$`mean(sc.catch)`)
+
+ggplot(mean.catch, aes(x=Year, y=plot.catch, color=ecosystem)) + geom_line() + geom_point() + facet_wrap(~plot.species)
+
+mean.catch$species <- ifelse(mean.catch$plot.species %in% c("Pink-even", "Pink-odd"), "Pink", mean.catch$plot.species)
+mean.catch <- arrange(mean.catch, species, Year)
+
+
+# note that above is only sst for GOA, cannot be applied to EBS!
+mean.catch <- filter(mean.catch, ecosystem=="Gulf of Alaska")
+# add smoothed winter sst
+mean.catch$sst.l1 <- sst.3[names(sst.3) %in% 1964:2017]
+mean.catch$sst.l2 <- sst.3[names(sst.3) %in% 1963:2016]
+mean.catch$sst.l3 <- sst.3[names(sst.3) %in% 1962:2015]
+
+
+mean.catch$plot.sst <- NA
+
+for(i in 1:nrow(mean.catch)){
+  ifelse(mean.catch$species[i] %in% c("Pink", "Coho"), mean.catch$plot.sst[i] <- mean.catch$sst.l1[i], 
+         ifelse(mean.catch$species[i] == "Sockeye", mean.catch$plot.sst[i] <- mean.catch$sst.l2[i], 
+                mean.catch$plot.sst[i] <- mean.catch$sst.l3[i]))
+}
+
+
+
+ggplot(filter(mean.catch, ecosystem=="Gulf of Alaska"), aes(x=plot.sst, y=plot.catch)) +  geom_point() + facet_wrap(~plot.species)
+
+# add era factor
+mean.catch$era <- NA
+
+for(i in 1:nrow(mean.catch)){
+  
+  mean.catch$era[i] <- ifelse(mean.catch$Year[i] %in% 1965:1988, "1965-1988", 
+                              ifelse(mean.catch$Year[i] %in% 1989:2013, "1989-2013", "2014-2018"))
+}
+   
+ggplot(filter(mean.catch, ecosystem=="Gulf of Alaska"), aes(x=plot.sst, y=plot.catch, color=era)) +
+  geom_point() + facet_wrap(~plot.species)
+
+
+ggplot(filter(mean.catch, ecosystem=="Gulf of Alaska"), aes(x=plot.sst, y=plot.catch, color=era)) +
+  geom_point() + facet_wrap(~plot.species) + geom_smooth(method="lm", se=F)
+
+# add PDO...
+win.pdo <- data.frame(year=1900:2019, win.pdo=win.pdo)
+win.pdo$win.pdo2 <- rollmean(win.pdo$win.pdo, 2, fill=NA, align="right")
+win.pdo$win.pdo3 <- rollmean(win.pdo$win.pdo, 3, fill=NA)
+
+
+mean.catch$win.PDO.1 <- win.pdo$win.pdo[match(mean.catch$entry.year, win.pdo$year)]
+mean.catch$win.PDO.2 <- win.pdo$win.pdo2[match(mean.catch$entry.year, win.pdo$year)]
+mean.catch$win.PDO.3 <- win.pdo$win.pdo3[match(mean.catch$entry.year, win.pdo$year)]
+
+ggplot(filter(mean.catch, ecosystem=="Gulf of Alaska", species != "Chum"), aes(x=win.PDO.3, y=plot.catch, color=era)) +
+  geom_point() + facet_wrap(~plot.species) + geom_smooth(method="lm", se=F)
+
+# gls
+gls.dat <- mean.catch %>%
+  filter(species=="Sockeye", ecosystem=="Gulf of Alaska")
+names(gls.dat)[4] <- "catch"
+
+mod1 <- gls(catch ~ win.PDO.3*era, data=gls.dat, correlation = corAR1())
+mod2 <- gls(catch ~ win.PDO.3+era, data=gls.dat, correlation = corAR1())
+MuMIn::AICc(mod1, mod2) # mod 2 better
+summary(mod1)$tTable
+
+gls.dat <- mean.catch %>%
+  filter(plot.species=="Pink-even", ecosystem=="Gulf of Alaska")
+
+names(gls.dat)[4] <- "catch"
+mod1 <- gls(catch ~ win.PDO.3*era, data=gls.dat, correlation = corAR1())
+mod2 <- gls(catch ~ win.PDO.3+era, data=gls.dat, correlation = corAR1())
+MuMIn::AICc(mod1, mod2) # mod 2 better
+summary(mod1)$tTable
+
+gls.dat <- mean.catch %>%
+  filter(plot.species=="Pink-odd", ecosystem=="Gulf of Alaska")
+
+names(gls.dat)[4] <- "catch"
+mod1 <- gls(catch ~ win.PDO.3*era, data=gls.dat, correlation = corAR1())
+mod2 <- gls(catch ~ win.PDO.3+era, data=gls.dat, correlation = corAR1())
+MuMIn::AICc(mod1, mod2) # mod 2 better
+summary(mod1)$tTable
+
+ggplot(filter(mean.catch, plot.species=="Pink-even"), aes(Year, plot.catch)) +
+  geom_line() + geom_point() # two big outlier years...need to go back and plot all the time series
+# try correlating with winter / summer sst / slp fields!
+
+# re-load ERSST
+nc <- nc_open("/Users/MikeLitzow 1/Documents/R/climate-data/data/North.Pacific.ersst")
+
+
+# extract dates
+ncvar_get(nc, "time")   # seconds since 1-1-1970
+raw <- ncvar_get(nc, "time")
+h <- raw/(24*60*60)
+sst.d <- dates(h, origin = c(1,1,1970))
+
+sst.x <- ncvar_get(nc, "longitude")
+sst.y <- ncvar_get(nc, "latitude")
+
+SST <- ncvar_get(nc,  "sst")
+# Change data from a 3-D array to a matrix of monthly data by grid point:
+# First, reverse order of dimensions ("transpose" array)
+SST <- aperm(SST, 3:1)  
+
+# Change to matrix with column for each grid point, rows for monthly means
+SST <- matrix(SST, nrow=dim(SST)[1], ncol=prod(dim(SST)[2:3]))  
+
+# Keep track of corresponding latitudes and longitudes of each column:
+sst.lat <- rep(sst.y, length(sst.x))   
+sst.lon <- rep(sst.x, each = length(sst.y))   
+dimnames(SST) <- list(as.character(sst.d), paste("N", sst.lat, "E", sst.lon, sep=""))
+
+# plot to check
+SST.mean <- colMeans(SST)
+z <- t(matrix(SST.mean,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=tim.colors(64))
+contour(sst.x, sst.y, z, add=T) 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+
+# a-ok!
+
+# now get NDJFM and MJJ means for each
+m <- months(sst.d)
+yr <- as.numeric(as.character(years(sst.d)))
+
+win.months <- m[m %in% c("Nov", "Dec", "Jan", "Feb", "Mar")]
+win.yrs <- ifelse(m %in% c("Nov", "Dec"), yr+1, yr)
+win.yrs <- win.yrs[m %in% c("Nov", "Dec", "Jan", "Feb", "Mar")]
+
+summ.months <-  m[m %in% c("May", "Jun", "Jul")]
+summ.yrs <- yr[m %in% c("May", "Jun", "Jul")]
+
+# get seperate matrices for winter and summer
+summ.SST <- SST[m %in% summ.months,]
+win.SST <- SST[m %in% win.months,]
+
+# now average for each year
+f <- function(x) tapply(x, summ.yrs, mean)
+summ.SST <- apply(summ.SST, 2, f)
+
+# plot to check
+SST.mean <- colMeans(summ.SST)
+z <- t(matrix(SST.mean,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=tim.colors(64))
+contour(sst.x, sst.y, z, add=T) 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+
+f <- function(x) tapply(x, win.yrs, mean)
+win.SST <- apply(win.SST, 2, f)
+
+# plot to check
+SST.mean <- colMeans(win.SST)
+z <- t(matrix(SST.mean,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=tim.colors(64))
+contour(sst.x, sst.y, z, add=T) 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+
+# all good!
+# now make correlation plots for each spp. in each era...
+
+# for convenience, add an 'entry.year' column to mean catch
+mean.catch$entry.year <- ifelse(mean.catch$species %in% c("Pink", "Coho"), mean.catch$Year-1,
+                                ifelse(mean.catch$species=="Sockeye", mean.catch$Year-2, mean.catch$Year-3))
+
+
+# first GOA sockeye
+# begin with winter
+winter.sockeye.65.88 <- winter.sockeye.89.13 <- winter.sockeye.14.19 <- NA
+
+for(j in 1:ncol(win.SST)){
+# note that we are using catch year as the nominal year matching the proposed eras
+# 
+  winter.sockeye.65.88[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 1963:1986, j], 
+                                 mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                                               mean.catch$species=="Sockeye" & 
+                                                               mean.catch$entry.year %in% 1963:1986])
+  
+  winter.sockeye.89.13[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 1987:2011, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1987:2011]) 
+  
+  winter.sockeye.14.19[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 2012:2016, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 2012:2016])
+}
+
+png("sockeye winter sst correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(winter.sockeye.65.88, winter.sockeye.89.13, winter.sockeye.14.19, na.rm=T)
+
+z <- t(matrix(winter.sockeye.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. winter sst 1965-1988")
+    
+z <- t(matrix(winter.sockeye.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. winter sst 1989-2013")
+
+z <- t(matrix(winter.sockeye.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. winter sst 2014-2019")
+
+dev.off()
+
+# and now the summer...
+
+summer.sockeye.65.88 <- summer.sockeye.89.13 <- summer.sockeye.14.19 <- NA
+
+for(j in 1:ncol(summ.SST)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  summer.sockeye.65.88[j] <- 
+    cor(summ.SST[rownames(summ.SST) %in% 1963:1986, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1963:1986])
+  
+  summer.sockeye.89.13[j] <- 
+    cor(summ.SST[rownames(summ.SST) %in% 1987:2011, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1987:2011]) 
+  
+  summer.sockeye.14.19[j] <- 
+    cor(summ.SST[rownames(summ.SST) %in% 2012:2016, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 2012:2016])
+}
+
+png("sockeye summer sst correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(summer.sockeye.65.88, summer.sockeye.89.13, summer.sockeye.14.19, na.rm=T)
+
+z <- t(matrix(summer.sockeye.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. summer sst 1965-1988")
+
+z <- t(matrix(summer.sockeye.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. summer sst 1989-2013")
+
+z <- t(matrix(summer.sockeye.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. summer sst 2014-2019")
+
+dev.off()
+
+# now pink!
+# combining odd and even for our purposes...
+winter.pink.65.88 <- winter.pink.89.13 <- winter.pink.14.19 <- NA
+
+for(j in 1:ncol(win.SST)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  winter.pink.65.88[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 1964:1987, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Pink" & 
+                                      mean.catch$entry.year %in% 1964:1987])
+  
+  winter.pink.89.13[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 1988:2012, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Pink" & 
+                                      mean.catch$entry.year %in% 1988:2012]) 
+  
+  winter.pink.14.19[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 2013:2017, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Pink" & 
+                                      mean.catch$entry.year %in% 2013:2017])
+}
+
+png("pink winter sst correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(winter.pink.65.88, winter.pink.89.13, winter.pink.14.19, na.rm=T)
+
+z <- t(matrix(winter.pink.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Pink v. winter sst 1965-1988")
+
+z <- t(matrix(winter.pink.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Pink v. winter sst 1989-2013")
+
+z <- t(matrix(winter.pink.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Pink v. winter sst 2014-2019")
+
+dev.off()
+
+# compare odd and even pink for the first two periods
+winter.pink.odd.65.88 <- winter.pink.even.65.88 <- 
+  winter.pink.odd.89.13 <- winter.pink.even.89.13 <- NA
+
+# set up odd and even dfs for convenience
+odd.catch <- mean.catch %>%
+  filter(ecosystem=="Gulf of Alaska", plot.species=="Pink-odd")
+
+even.catch <- mean.catch %>%
+  filter(ecosystem=="Gulf of Alaska", plot.species=="Pink-even")
+
+for(j in 1:ncol(win.SST)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+ # j <- 1
+  
+  yy <- filter(odd.catch, entry.year <= 1987)
+  xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+  winter.pink.odd.65.88[j] <- cor(xx, yy$`mean(sc.catch)`)
+  
+  yy <- filter(even.catch, entry.year <= 1987)
+  xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+  winter.pink.even.65.88[j] <- cor(xx, yy$`mean(sc.catch)`)
+  
+  yy <- filter(odd.catch, entry.year %in% 1988:2012)
+  xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+  winter.pink.odd.89.13[j] <- cor(xx, yy$`mean(sc.catch)`)
+  
+  yy <- filter(even.catch, entry.year %in% 1988:2012)
+  xx <- win.SST[match(yy$entry.year, rownames(win.SST)), j]
+  winter.pink.even.89.13[j] <- cor(xx, yy$`mean(sc.catch)`)
+}
+
+# plot!
+png("pink odd even winter sst correlations by era.png", 6, 6, units="in", res=300)
+par(mfrow=c(2,2), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- c(-1,1)
+
+z <- t(matrix(winter.pink.odd.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("Odd year pink", outer=T, cex=1.2, side=2, adj=0.9)
+mtext("1965-1988", outer=T, cex=1.2, side=3, adj=0.1)
+
+z <- t(matrix(winter.pink.odd.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("1989-2013", outer=T, cex=1.2, side=3, adj=0.1)
+
+z <- t(matrix(winter.pink.even.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Even pink v. winter sst 1965-1988")
+
+z <- t(matrix(winter.pink.even.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Even pink v. winter sst 1989-2013")
+dev.off()
+
+
+
+# and coho
+
+winter.coho.65.88 <- winter.coho.89.13 <- winter.coho.14.19 <- NA
+
+for(j in 1:ncol(win.SST)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  winter.coho.65.88[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 1964:1987, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Coho" & 
+                                      mean.catch$entry.year %in% 1964:1987])
+  
+  winter.coho.89.13[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 1988:2012, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Coho" & 
+                                      mean.catch$entry.year %in% 1988:2012]) 
+  
+  winter.coho.14.19[j] <- 
+    cor(win.SST[rownames(win.SST) %in% 2013:2017, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Coho" & 
+                                      mean.catch$entry.year %in% 2013:2017])
+}
+
+png("coho winter sst correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(winter.coho.65.88, winter.coho.89.13, winter.coho.14.19, na.rm=T)
+
+z <- t(matrix(winter.coho.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Coho v. winter sst 1965-1988")
+
+z <- t(matrix(winter.coho.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Coho v. winter sst 1989-2013")
+
+z <- t(matrix(winter.coho.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x, sst.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Coho v. winter sst 2014-2019")
+
+dev.off()
+
+
+# combined plot for all 3 spp and winter sst
+
+png("correlations with winter sst sockeye pink coho.png", 6, 6, units="in", res=300)
+
+par(mfrow=c(3,3), mar=c(0.5,0.5,0.5,0.5), oma=c(2,2,2,0))
+
+lim <- c(-1,1)
+# first, sockeye
+z <- t(matrix(winter.sockeye.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("Sockeye", outer=T, cex=1.2, side=2, adj=0.9)
+mtext("1965-1988", outer=T, cex=1.2, side=3, adj=0.1)
+
+z <- t(matrix(winter.sockeye.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("1989-2013", outer=T, cex=1.2, side=3, adj=0.5)
+
+z <- t(matrix(winter.sockeye.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("2014-2018", outer=T, cex=1.2, side=3, adj=0.9)
+
+# pink
+z <- t(matrix(winter.pink.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("Pink", outer=T, cex=1.2, side=2, adj=0.5)
+
+z <- t(matrix(winter.pink.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+
+z <- t(matrix(winter.pink.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+
+# finally, coho
+z <- t(matrix(winter.coho.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+mtext("Coho", outer=T, cex=1.2, side=2, adj=0.1)
+
+
+z <- t(matrix(winter.coho.89.13,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+
+# add legend strip
+mt.cex <- 1.1
+l.mar <- 3
+l.cex <- 0.8
+l.l <- 1.2
+tc.l <- -0.2
+
+z <- seq(-1,1,length.out=100)
+
+image.plot(z, legend.only=TRUE, horizontal =TRUE,  legend.lab = "r", 
+           smallplot = c(0,0.78,0.05,0.23), 
+           legend.cex=0.8, col=new.col,
+           legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0))) 
+
+z <- t(matrix(winter.coho.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(sst.x,sst.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(sst.x,sst.y,z, add=T, col="grey",vfont=c("sans serif", "bold"))
+map('world2Hires', 'Canada', fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3")
+map('world2Hires', 'usa',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'USSR',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Japan',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'Mexico',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'China',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires', 'South Korea',fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col="darkgoldenrod3") 
+map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
+# mtext("Coho v. winter sst 2014-2019")
+
+dev.off()
+
+
+
+
+
+# and the same plots for SLP!
+# using monthly NCEP/NCAR!
+nc.slp <- nc_open("/Users/MikeLitzow 1/Documents/R/climate-data/data/North.Pacific.NCEP.NCAR.slp")
+# now process SLP data - first, extract dates
+raw <- ncvar_get(nc.slp, "time")  # seconds since 1-1-1970
+h <- raw/(24*60*60)
+slp.d <- dates(h, origin = c(1,1,1970))
+
+slp.x <- ncvar_get(nc.slp, "longitude")
+slp.y <- ncvar_get(nc.slp, "latitude")
+
+SLP <- ncvar_get(nc.slp, "slp", verbose = F)
+# Change data from a 3-D array to a matrix of monthly data by grid point:
+# First, reverse order of dimensions ("transpose" array)
+SLP <- aperm(SLP, 3:1)  
+
+# Change to matrix with column for each grid point, rows for monthly means
+SLP <- matrix(SLP, nrow=dim(SLP)[1], ncol=prod(dim(SLP)[2:3]))  
+
+# Keep track of corresponding latitudes and longitudes of each column:
+slp.lat <- rep(slp.y, length(slp.x))   
+slp.lon <- rep(slp.x, each = length(slp.y))   
+dimnames(SLP) <- list(as.character(slp.d), paste("N", slp.lat, "E", slp.lon, sep=""))
+
+# plot to check
+SLP.mean <- colMeans(SLP)
+z <- t(matrix(SLP.mean,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=tim.colors(64))
+contour(slp.x, slp.y, z, add=T) 
+map('world2Hires',fill=F,add=T, lwd=2)
+
+# now get NDJFM and MJJ means for each
+m <- months(slp.d)
+yr <- as.numeric(as.character(years(slp.d)))
+
+win.months <- m[m %in% c("Nov", "Dec", "Jan", "Feb", "Mar")]
+win.yrs <- ifelse(m %in% c("Nov", "Dec"), yr+1, yr)
+win.yrs <- win.yrs[m %in% c("Nov", "Dec", "Jan", "Feb", "Mar")]
+
+summ.months <-  m[m %in% c("May", "Jun", "Jul")]
+summ.yrs <- yr[m %in% c("May", "Jun", "Jul")]
+
+# get seperate matrices for winter and summer
+summ.SLP <- SLP[m %in% summ.months,]
+win.SLP <- SLP[m %in% win.months,]
+
+# now average for each year
+f <- function(x) tapply(x, summ.yrs, mean)
+summ.SLP <- apply(summ.SLP, 2, f)
+
+# plot to check
+SLP.mean <- colMeans(summ.SLP)
+z <- t(matrix(SLP.mean,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=tim.colors(64))
+contour(slp.x, slp.y, z, add=T) 
+map('world2Hires',fill=F,add=T, lwd=2)
+
+f <- function(x) tapply(x, win.yrs, mean)
+win.SLP <- apply(win.SLP, 2, f)
+
+# plot to check
+SLP.mean <- colMeans(win.SLP)
+z <- t(matrix(SLP.mean,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=tim.colors(64))
+contour(slp.x, slp.y, z, add=T) 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+
+# plot era-specific correlations
+# first GOA sockeye
+# begin with winter
+winter.sockeye.65.88.SLP <- winter.sockeye.89.13.SLP <- winter.sockeye.14.19.SLP <- NA
+
+for(j in 1:ncol(win.SLP)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  winter.sockeye.65.88.SLP[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 1963:1986, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1963:1986])
+  
+  winter.sockeye.89.13.SLP[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 1987:2011, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1987:2011]) 
+  
+  winter.sockeye.14.19.SLP[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 2012:2016, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 2012:2016])
+}
+
+png("sockeye winter slp correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(winter.sockeye.65.88.SLP, winter.sockeye.89.13.SLP, winter.sockeye.14.19.SLP, na.rm=T)
+
+z <- t(matrix(winter.sockeye.65.88.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. winter slp 1965-1988")
+
+z <- t(matrix(winter.sockeye.89.13.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. winter slp 1989-2013")
+
+z <- t(matrix(winter.sockeye.14.19.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. winter slp 2014-2019")
+
+dev.off()
+
+# and now the summer...
+
+summer.sockeye.65.88.SLP <- summer.sockeye.89.13.SLP <- summer.sockeye.14.19.SLP <- NA
+
+for(j in 1:ncol(summ.SLP)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  summer.sockeye.65.88.SLP[j] <- 
+    cor(summ.SLP[rownames(summ.SLP) %in% 1963:1986, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1963:1986])
+  
+  summer.sockeye.89.13.SLP[j] <- 
+    cor(summ.SLP[rownames(summ.SLP) %in% 1987:2011, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 1987:2011]) 
+  
+  summer.sockeye.14.19.SLP[j] <- 
+    cor(summ.SLP[rownames(summ.SLP) %in% 2012:2016, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Sockeye" & 
+                                      mean.catch$entry.year %in% 2012:2016])
+}
+
+png("sockeye summer slp correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(summer.sockeye.65.88.SLP, summer.sockeye.89.13.SLP, summer.sockeye.14.19.SLP, na.rm=T)
+
+z <- t(matrix(summer.sockeye.65.88.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. summer slp 1965-1988")
+
+z <- t(matrix(summer.sockeye.89.13.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. summer slp 1989-2013")
+
+z <- t(matrix(summer.sockeye.14.19.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Sockeye v. summer slp 2014-2019")
+
+dev.off()
+
+# now pink!
+# combining odd and even for our purposes...
+winter.pink.65.88.SLP <- winter.pink.89.13.SLP <- winter.pink.14.19.SLP <- NA
+
+for(j in 1:ncol(win.SLP)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  winter.pink.65.88.SLP[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 1964:1987, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Pink" & 
+                                      mean.catch$entry.year %in% 1964:1987])
+  
+  winter.pink.89.13.SLP[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 1988:2012, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Pink" & 
+                                      mean.catch$entry.year %in% 1988:2012]) 
+  
+  winter.pink.14.19.SLP[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 2013:2017, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Pink" & 
+                                      mean.catch$entry.year %in% 2013:2017])
+}
+
+png("pink winter slp correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(winter.pink.65.88.SLP, winter.pink.89.13.SLP, winter.pink.14.19.SLP, na.rm=T)
+
+z <- t(matrix(winter.pink.65.88.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=c(-lim[2], lim[2]), ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Pink v. winter slp 1965-1988")
+
+z <- t(matrix(winter.pink.89.13.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=c(-lim[2], lim[2]), ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Pink v. winter slp 1989-2013")
+
+z <- t(matrix(winter.pink.14.19.SLP,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=c(-lim[2], lim[2]), ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Pink v. winter slp 2014-2019")
+
+dev.off()
+
+# and coho
+# now pink!
+# combining odd and even for our purposes...
+winter.coho.65.88 <- winter.coho.89.13 <- winter.coho.14.19 <- NA
+
+for(j in 1:ncol(win.SLP)){
+  # note that we are using catch year as the nominal year matching the proposed eras
+  # 
+  winter.coho.65.88[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 1964:1987, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Coho" & 
+                                      mean.catch$entry.year %in% 1964:1987])
+  
+  winter.coho.89.13[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 1988:2012, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Coho" & 
+                                      mean.catch$entry.year %in% 1988:2012]) 
+  
+  winter.coho.14.19[j] <- 
+    cor(win.SLP[rownames(win.SLP) %in% 2013:2017, j], 
+        mean.catch$`mean(sc.catch)`[mean.catch$ecosystem=="Gulf of Alaska" & 
+                                      mean.catch$species=="Coho" & 
+                                      mean.catch$entry.year %in% 2013:2017])
+}
+
+png("coho winter slp correlations by era.png", 8, 3, units="in", res=300)
+par(mfrow=c(1,3), mar=c(1,1,1.5,1))
+
+new.col <- tim.colors(64)
+grays <- c("gray90", "gray89", "gray88",
+           "gray87","gray86")
+
+new.col[27:36] <- c(grays[5:1], grays[1:5])
+
+lim <- range(winter.coho.65.88, winter.coho.89.13, winter.coho.14.19, na.rm=T)
+
+z <- t(matrix(winter.coho.65.88,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Coho v. winter slp 1965-1988")
+
+z <- t(matrix(winter.coho.89.13,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Coho v. winter slp 1989-2013")
+
+z <- t(matrix(winter.coho.14.19,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=new.col, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+contour(slp.x, slp.y, z, add=T, col="grey") 
+map('world2Hires',fill=F,xlim=c(130,250), ylim=c(20,66),add=T, lwd=2)
+mtext("Coho v. winter slp 2014-2019")
+
+dev.off()
+
+# fit gls models
+
+chum <- gls(plot.catch ~ plot.sst*era, correlation = corAR1(), data=filter(mean.catch, plot.species=="Chum"))
+summary(chum)
+
+coho <- gls(plot.catch ~ plot.sst*era, correlation = corAR1(), data=filter(mean.catch, plot.species=="Coho"))
+summary(coho)
+
+pink.even <- gls(plot.catch ~ plot.sst*era, correlation = corAR1(), data=filter(mean.catch, plot.species=="Pink-even"))
+summary(pink.even)
+
+pink.odd <- gls(plot.catch ~ plot.sst*era, correlation = corAR1(), data=filter(mean.catch, plot.species=="Pink-odd"))
+summary(pink.odd)
+
+sockeye <- gls(plot.catch ~ plot.sst*era, correlation = corAR1(), data=filter(mean.catch, plot.species=="Sockeye"))
+summary(sockeye)
+
+# now compare AIC support for 3-era vs 2-era model for each
+library(MuMIn)
+names(mean.catch)[11] <- "era.3"
+mean.catch$era.2 <- ifelse(mean.catch$Year < 1989, "1965-1988", "1989-2018")
+# define era 3 by temp
+mean.catch$era.3 <- ifelse(mean.catch$Year < 1989, "era1", ifelse(mean.catch$plot.sst<6.5, "era2", "era3"))
+
+chum3 <- gls(plot.catch ~ plot.sst*era.3, correlation = corAR1(), data=filter(mean.catch, plot.species=="Chum"))
+chum2 <- gls(plot.catch ~ plot.sst*era.2, correlation = corAR1(), data=filter(mean.catch, plot.species=="Chum"))
+AICc(chum2,chum3) # 2-era
+
+coho3 <- gls(plot.catch ~ plot.sst*era.3, correlation = corAR1(), data=filter(mean.catch, plot.species=="Coho"))
+coho2 <- gls(plot.catch ~ plot.sst*era.2, correlation = corAR1(), data=filter(mean.catch, plot.species=="Coho"))
+AICc(coho2,coho3) # 2-era
+
+pink.even3 <- gls(plot.catch ~ plot.sst*era.3, correlation = corAR1(), data=filter(mean.catch, plot.species=="Pink-even"))
+pink.even2 <- gls(plot.catch ~ plot.sst*era.2, correlation = corAR1(), data=filter(mean.catch, plot.species=="Pink-even"))
+AICc(pink.even2,pink.even3) # 2-era
+
+pink.odd3 <- gls(plot.catch ~ plot.sst*era.3, correlation = corAR1(), data=filter(mean.catch, plot.species=="Pink-odd"))
+pink.odd2 <- gls(plot.catch ~ plot.sst*era.2, correlation = corAR1(), data=filter(mean.catch, plot.species=="Pink-odd"))
+AICc(pink.odd2,pink.odd3) # 2-era
+
