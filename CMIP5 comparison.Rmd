@@ -306,8 +306,20 @@ ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
   geom_ribbon(aes(ymin=ranges$min.anomaly, ymax=ranges$max.anomaly), alpha=0.2) +
   geom_ribbon(aes(ymin=ranges$min.anomaly3, ymax=ranges$max.anomaly3), alpha=0.2, fill=cb[3]) +
   theme(axis.title.x = element_blank()) +
-  ylab("SST anomaly")+
+  ylab("SST anomaly") +
   ggtitle("Observations v. raw envelope")
+
+# and save a png version
+plot <- ggplot(filter(annual, year >= 1900), aes(year, anomaly)) +
+  theme_bw() +
+  geom_line() +
+  geom_point() +
+  geom_line(aes(year, anomaly3), color=cb[3]) +
+  geom_ribbon(aes(ymin=ranges$min.anomaly, ymax=ranges$max.anomaly), alpha=0.2) +
+  geom_ribbon(aes(ymin=ranges$min.anomaly3, ymax=ranges$max.anomaly3), alpha=0.2, fill=cb[3]) +
+  theme(axis.title.x = element_blank()) +
+  ylab("SST anomaly")
+ggsave(plot=plot, "goa sst observations and raw envelope.png", width=6, height=4, units="in")
 ```
 
 Conclusion: the debiasing is more conservative, presumably because it removes internal variability in the recent observations that is not captured by the preindustrial simulations. The raw envelope produces a conclusion more similar to Walsh et al., with a single year outside the envelope of preindustrial conditions.
