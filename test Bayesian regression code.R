@@ -72,9 +72,10 @@ ggplot(plot.dat, aes(x=beta, fill=era)) +
   theme_bw() +
   geom_density(alpha=0.7) + 
   scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-  geom_vline(xintercept = 0, lty=2)
+  geom_vline(xintercept = 0, lty=2) +
+  xlim(-2.5,1.5)
 
-ggsave("sockeye stan era slopes.png")
+ggsave("sockeye stan era slopes.png", width=5, height = 3, units='in')
 
 # this is obviously a poor first step - need to estimate era-specific slopes within a single model
 
