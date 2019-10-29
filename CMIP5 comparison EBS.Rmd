@@ -282,7 +282,7 @@ annual$year <- as.numeric(as.character(annual$year))
 # set pallette
 cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
+ggplot(annual, aes(year, anomaly)) +
   theme_bw() +
   geom_line() +
   geom_point() +
@@ -298,7 +298,7 @@ ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
 And here is the same plot, using the actual preindustrial envelope, without the debiasing described above. 
 ```{r, fig.height=3, warning=F}
 # compare with non-debiased estimates...
-ggplot(filter(annual, year >= 1950), aes(year, anomaly)) +
+ggplot(annual, aes(year, anomaly)) +
   theme_bw() +
   geom_line() +
   geom_point() +
