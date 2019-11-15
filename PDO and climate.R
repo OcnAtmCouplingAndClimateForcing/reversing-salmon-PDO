@@ -49,32 +49,33 @@ library(plyr)
 library(rstanarm)
 library(bayesplot)
 
-
 # rename pdo 
 names(dat)[2] <- "pdo"
 
 #era as function
 dat$era <- as.factor(dat$era)
 
-
 ## fit a model with era-specific intercepts and slopes 
 
-era_NPI_2 <- stan_glm(scale(value) ~ era + pdo:era,
+## none of the slopes on pdo appear to differ among eras - 
+## try w/ just era & pdo amin effects
+
+era_NPI_2 <- stan_glm(scale(value) ~ era + pdo,
                     data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
                     chains = 4, cores = 4, thin = 1,
                     warmup = 1000, iter = 4000, refresh = 0)
 
-era_stress_2 <- stan_glm(scale(value) ~ era + pdo:era,
+era_stress_2 <- stan_glm(scale(value) ~ era + pdo,
                        data = dat[dat$key == "GOA Wind stress (Feb-Apr)", ],
                        chains = 4, cores = 4, thin = 1,
                        warmup = 1000, iter = 4000, refresh = 0)
 
-era_SSH_2 <- stan_glm(scale(value) ~ era + pdo:era,
+era_SSH_2 <- stan_glm(scale(value) ~ era + pdo,
                     data = dat[dat$key == "GOA Sea surface height (Feb-Apr)", ],
                     chains = 4, cores = 4, thin = 1,
                     warmup = 1000, iter = 4000, refresh = 0)
 
-era_SST_2 <- stan_glm(scale(value) ~ era + pdo:era,
+era_SST_2 <- stan_glm(scale(value) ~ era + pdo,
                     data = dat[dat$key == "GOA Sea surface temp. (Nov-Mar)", ],
                     chains = 4, cores = 4, thin = 1,
                     warmup = 1000, iter = 4000, refresh = 0)
@@ -109,27 +110,15 @@ lst <- lapply(lst, function(x) {
   beta <- as.matrix(x, pars = c("era1:pdo", "era2:pdo", "era3:pdo"))
   data.frame(key = unique(x$data$key),
              era1 = beta[ , 1],
-             era2 = beta[ , 1] + beta[ , 2],
-             era3 = beta[ , 1] + beta[ , 3])
+             era2 = beta[ , 2],
+             era3 = beta[ , 3])
 })
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
-
-slope <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
-  theme_bw() +
-  geom_density(alpha = 0.7) +
-  scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-  geom_vline(xintercept = 0, lty = 2) +
-  labs(x = "Slope",
-       y = "Posterior density",
-       fill = "Era",
-       title = "Era-specific slopes") +
-  facet_wrap( ~ key, scales="free") 
-print(slope)
 
 # make a combined plot
 library(ggpubr)
 
 png("era-specific PDO and climate.png", 6, 10, units='in', res=300)
-ggarrange(scatter, int, slope, ncol=1, nrow=3)
+ggarrange(scatter, int, ncol=1, nrow=3)
 dev.off()
