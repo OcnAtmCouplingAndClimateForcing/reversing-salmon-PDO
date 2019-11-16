@@ -18,6 +18,7 @@ cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
 ## Prep data -----------------------------------------------
 dat3 <- na.omit(raw.dat)
 dat3 <- plyr::ddply(dat3, .(species), transform, pdo = scale(PDO3))
+dat3 <- plyr::ddply(dat3, .(species), transform, sst = scale(SST3))
 dat3$era <- as.factor(dat3$era)
 
 ## Find start and end indices for each species
@@ -42,11 +43,11 @@ dat3_stan <- list(y = dat3$catch,
 
 ## Plot data -----------------------------------------------
 
-## Catch (color) + PDO (black)
+## Catch (color) + SST (black)
 g <- ggplot(dat3) +
     geom_hline(yintercept = 0, color = "grey50", linetype = 2) +
     geom_line(aes(x = Year, y = catch, color = species)) +
-    geom_line(data = dat3[dat3$species == "Coho", ], aes(x = Year, y = pdo),
+    geom_line(data = dat3[dat3$species == "Coho", ], aes(x = Year, y = sst),
               color = "black", size = 1) +
     theme_bw()
 print(g)
@@ -60,14 +61,31 @@ g <- ggplot(dat3) +
 print(g)
 
 
+dat3$plot.order <- ifelse(dat3$species=="Pink-odd", 1,
+                              ifelse(dat3$species=="Pink-even", 2,
+                                     ifelse(dat3$species=="Sockeye", 3, 4)))
+
+dat3$species <- reorder(dat3$species, dat3$plot.order)
+
+
+# set colors
+cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# reset era names for plotting
+dat3$era.labs <- factor(dat3$era, labels = c("1965-1988", "1989-2013", "2014-2019"))
+
 ## Catch vs. PDO
 ## This suggests to me that we could pool all species
 g <- ggplot(dat3) +
     aes(x = pdo, y = catch, color = species) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE) +
-    facet_wrap( ~ era) +
+    facet_wrap( ~plot.era) +
+    scale_color_manual(values=c(cb[2], cb[7], cb[6], cb[4])) +
     theme_bw()
+
+g <- g + facet_grid(. ~era.labs)
+
 print(g)
 
 
