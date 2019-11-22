@@ -75,30 +75,42 @@ dat$key[change] <- "Sea surface temp. (Nov-Mar)"
 dat$key <- factor(dat$key)
 dat$key <- reorder(dat$key, dat$key.order)
 
-## fit a model with era-specific intercepts and slopes 
+## fit a model with era-specific intercepts and slopes
 
-## none of the slopes on pdo appear to differ among eras - 
-## try w/ just era & pdo amin effects
+## none of the slopes on pdo appear to differ among eras -
+## try w/ just era & pdo main effects
 
 era_NPI_2 <- stan_glm(scale(value) ~ era + pdo,
-                    data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
-                    chains = 4, cores = 4, thin = 1,
-                    warmup = 1000, iter = 4000, refresh = 0)
+                      data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
+                      chains = 4, cores = 4, thin = 1,
+                      warmup = 1000, iter = 4000, refresh = 0,
+                      prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_stress_2 <- stan_glm(scale(value) ~ era + pdo,
-                       data = dat[dat$key == "Wind stress (Feb-Apr)", ],
-                       chains = 4, cores = 4, thin = 1,
-                       warmup = 1000, iter = 4000, refresh = 0)
+                         data = dat[dat$key == "Wind stress (Feb-Apr)", ],
+                         chains = 4, cores = 4, thin = 1,
+                         warmup = 1000, iter = 4000, refresh = 0,
+                         prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                         prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                         prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_SSH_2 <- stan_glm(scale(value) ~ era + pdo,
-                    data = dat[dat$key == "Sea surface height (Feb-Apr)", ],
-                    chains = 4, cores = 4, thin = 1,
-                    warmup = 1000, iter = 4000, refresh = 0)
+                      data = dat[dat$key == "Sea surface height (Feb-Apr)", ],
+                      chains = 4, cores = 4, thin = 1,
+                      warmup = 1000, iter = 4000, refresh = 0,
+                      prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_SST_2 <- stan_glm(scale(value) ~ era + pdo,
-                    data = dat[dat$key == "Sea surface temp. (Nov-Mar)", ],
-                    chains = 4, cores = 4, thin = 1,
-                    warmup = 1000, iter = 4000, refresh = 0)
+                      data = dat[dat$key == "Sea surface temp. (Nov-Mar)", ],
+                      chains = 4, cores = 4, thin = 1,
+                      warmup = 1000, iter = 4000, refresh = 0,
+                      prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 lst <- list(era_NPI_2, era_stress_2, era_SSH_2, era_SST_2)
 
@@ -150,3 +162,29 @@ png("era-specific PDO and climate.png", 6, 10, units='in', res=300)
 ggarrange(scatter, int, ncol=1, nrow=3)
 dev.off()
 >>>>>>> 56532b40c36f9c08c902e9cf4c0d0008c147d926
+
+
+## Bayesian model diagnostics
+post_era_NPI_2    <- as.array(era_NPI_2)
+post_era_stress_2 <- as.array(era_stress_2)
+post_era_SSH_2    <- as.array(era_SSH_2)
+post_era_SST_2    <- as.array(era_SST_2)
+
+mcmc_trace(post_era_NPI_2)
+mcmc_trace(post_era_stress_2)
+mcmc_trace(post_era_SSH_2)
+mcmc_trace(post_era_SST_2)
+
+mcmc_areas(post_era_NPI_2)
+mcmc_areas(post_era_stress_2)
+mcmc_areas(post_era_SSH_2)
+mcmc_areas(post_era_SST_2)
+
+range(summary(era_NPI_2[["stanfit"]])[["summary"]][ , "n_eff"])
+range(summary(era_NPI_2[["stanfit"]])[["summary"]][ , "Rhat"])
+range(summary(era_stress_2[["stanfit"]])[["summary"]][ , "n_eff"])
+range(summary(era_stress_2[["stanfit"]])[["summary"]][ , "Rhat"])
+range(summary(era_SSH_2[["stanfit"]])[["summary"]][ , "n_eff"])
+range(summary(era_SSH_2[["stanfit"]])[["summary"]][ , "Rhat"])
+range(summary(era_SST_2[["stanfit"]])[["summary"]][ , "n_eff"])
+range(summary(era_SST_2[["stanfit"]])[["summary"]][ , "Rhat"])
