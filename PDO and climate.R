@@ -124,6 +124,11 @@ lst <- lapply(lst, function(x) {
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
+int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
+                       mean = mean(value),
+                       lower95 = quantile(value, probs = 0.025),
+                       upper95 = quantile(value, probs = 0.975))
+
 int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   theme_bw() +
   geom_density(alpha = 0.7) +
