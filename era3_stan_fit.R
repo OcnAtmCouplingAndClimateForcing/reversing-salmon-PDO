@@ -262,6 +262,7 @@ print(g)
 
 
 ## Using rstanarm
+# era3_hier_arm <- stan_glmer(catch ~ era + pdo + pdo:era + (era + pdo + pdo:era | species),
 era3_hier_arm <- stan_glmer(catch ~ pdo + pdo:era + (pdo + pdo:era | species),
                             data = dat3,
                             chains = 4, cores = 4, thin = 1,
@@ -269,6 +270,7 @@ era3_hier_arm <- stan_glmer(catch ~ pdo + pdo:era + (pdo + pdo:era | species),
 fixef(era3_hier_arm)
 ranef(era3_hier_arm)
 coef(era3_hier_arm)
+era3_hier_arm$covmat
 print(era3_hier_arm)
 
 mu_beta_arm <- as.matrix(era3_hier_arm, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
