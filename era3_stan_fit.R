@@ -6,6 +6,7 @@ library(plyr)
 library(rstanarm)
 library(bayesplot)
 
+# NOTE THAT THESE YEARS ARE ALREADY LAGGED TO ENTRY YEAR
 raw.dat <- read.csv("salmon.and.covariate.data.csv")
 raw.dat[["era"]] <- ifelse(raw.dat$Year <= 1986, "era1",
                     ifelse(raw.dat$Year %in% 1987:2011, "era2", "era3"))
@@ -76,156 +77,156 @@ dat3$era.labs <- factor(dat3$era, labels = c("1965-1988", "1989-2013", "2014-201
 
 ## Catch vs. PDO
 ## This suggests to me that we could pool all species
-g <- ggplot(dat3) +
+scatter <- ggplot(dat3) +
     aes(x = pdo, y = catch, color = species) +
     geom_point() +
     geom_smooth(method = "lm", se = FALSE) +
-    facet_wrap( ~plot.era) +
+    facet_wrap( ~era.labs) +
     scale_color_manual(values=c(cb[2], cb[7], cb[6], cb[4])) +
-    theme_bw()
-
-g <- g + facet_grid(. ~era.labs)
-
-print(g)
+    theme_bw() + ylab("Catch anomaly") + xlab("PDO (Nov-Mar, 3-yr running mean)") +
+    theme(legend.title = element_blank())
 
 
-
-## 3 era: no species ---------------------------------------
-
-## Use hand-coded Stan model
-stan_era3_nospecies <- stan_model("era3_nospecies.stan")
-
-era3_nospecies <- sampling(stan_era3_nospecies, data = dat3_stan,
-                           pars = "yhat", include = FALSE,
-                           chains = 4, cores = 4, thin = 1,
-                           warmup = 1000, iter = 4000, refresh = 0)
-print(era3_nospecies)
-check_divergences(era3_nospecies)
-
-beta <- as.matrix(era3_nospecies, pars = c("beta1", "beta2", "beta3"))
-coef_nospecies <- data.frame(era1 = beta[ , 1],
-                             era2 = beta[ , 2],
-                             era3 = beta[ , 3])
-mdf_nospecies <- reshape2::melt(coef_nospecies)
-
-g <- ggplot(mdf_nospecies, aes(x = value, fill = variable)) +
-    theme_bw() +
-    geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-    geom_vline(xintercept = 0, lty = 2) +
-    labs(x = "Slope",
-         y = "Posterior density",
-         fill = "Era",
-         title = "No species")
-print(g)
-
-
-## Use rstanarm
-era3_nospecies_arm <- stan_glm(catch ~ pdo + pdo:era, data = dat3,
-                               chains = 4, cores = 4, thin = 1,
-                               warmup = 1000, iter = 4000, refresh = 0)
-print(era3_nospecies_arm)
-
-beta_arm <- as.matrix(era3_nospecies_arm, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
-coef_nospecies_arm <- data.frame(era1 = beta_arm[ , 1],
-                                 era2 = beta_arm[ , 1] + beta_arm[ , 2],
-                                 era3 = beta_arm[ , 1] + beta_arm[ , 3])
-mdf_nospecies_arm <- reshape2::melt(coef_nospecies_arm)
-
-g <- ggplot(mdf_nospecies_arm, aes(x = value, fill = variable)) +
-    theme_bw() +
-    geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-    geom_vline(xintercept = 0, lty = 2) +
-    labs(x = "Slope",
-         y = "Posterior density",
-         fill = "Era",
-         title = "No species: rstanarm")
-print(g)
+print(scatter)
 
 
 
-## 3 era: species fit independently ------------------------
-
-## Use hand-coded Stan model
-stan_era3_indv <- stan_model("era3_indv.stan")
-
-era3_indv <- sampling(stan_era3_indv, data = dat3_stan,
-                      pars = "yhat", include = FALSE,
-                      chains = 4, cores = 4, thin = 1,
-                      warmup = 1000, iter = 4000, refresh = 0)
-print(era3_indv)
-check_divergences(era3_indv)
-
-species <- unique(dat3$species)
-lst <- vector("list", length(species))
-for(i in seq_along(species)) {
-    b1 <- paste0("beta1[", i, "]")
-    b2 <- paste0("beta2[", i, "]")
-    b3 <- paste0("beta3[", i, "]")
-    beta <- as.matrix(era3_indv, pars = c(b1, b2, b3))
-    df <- data.frame(species = species[i],
-                     era1 = beta[ , 1],
-                     era2 = beta[ , 2],
-                     era3 = beta[ , 3])
-    lst[[i]] <- reshape2::melt(df, id.vars = "species")
-}
-mdf_indv <- plyr::rbind.fill(lst)
-
-g <- ggplot(mdf_indv, aes(x = value, fill = variable)) +
-    theme_bw() +
-    geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-    geom_vline(xintercept = 0, lty = 2) +
-    labs(x = "Slope",
-         y = "Posterior density",
-         fill = "Era",
-         title = "Species independent") +
-    facet_wrap( ~ species)
-print(g)
-
-
-## Using rstanarm
-era3_sock <- stan_glm(catch ~ pdo + pdo:era,
-                      data = dat3[dat3$species == "Sockeye", ],
-                      chains = 4, cores = 4, thin = 1,
-                      warmup = 1000, iter = 4000, refresh = 0)
-era3_pinke <- stan_glm(catch ~ pdo + pdo:era,
-                       data = dat3[dat3$species == "Pink-even", ],
-                       chains = 4, cores = 4, thin = 1,
-                       warmup = 1000, iter = 4000, refresh = 0)
-era3_pinko <- stan_glm(catch ~ pdo + pdo:era,
-                       data = dat3[dat3$species == "Pink-odd", ],
-                       chains = 4, cores = 4, thin = 1,
-                       warmup = 1000, iter = 4000, refresh = 0)
-era3_coho <- stan_glm(catch ~ pdo + pdo:era,
-                      data = dat3[dat3$species == "Coho", ],
-                      chains = 4, cores = 4, thin = 1,
-                      warmup = 1000, iter = 4000, refresh = 0)
-
-lst <- list(era3_sock, era3_pinke, era3_pinko, era3_coho)
-lst <- lapply(lst, function(x) {
-    beta <- as.matrix(x, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
-    data.frame(Species = unique(x$data$species),
-               era1 = beta[ , 1],
-               era2 = beta[ , 1] + beta[ , 2],
-               era3 = beta[ , 1] + beta[ , 3])
-})
-coef_indv_arm <- plyr::rbind.fill(lst)
-mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "Species")
-
-g <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
-    theme_bw() +
-    geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-    geom_vline(xintercept = 0, lty = 2) +
-    labs(x = "Slope",
-         y = "Posterior density",
-         fill = "Era",
-         title = "Species independent: rstanarm") +
-    facet_wrap( ~ Species)
-print(g)
-
+# ## 3 era: no species ---------------------------------------
+# 
+# ## Use hand-coded Stan model
+# stan_era3_nospecies <- stan_model("era3_nospecies.stan")
+# 
+# era3_nospecies <- sampling(stan_era3_nospecies, data = dat3_stan,
+#                            pars = "yhat", include = FALSE,
+#                            chains = 4, cores = 4, thin = 1,
+#                            warmup = 1000, iter = 4000, refresh = 0)
+# print(era3_nospecies)
+# check_divergences(era3_nospecies)
+# 
+# beta <- as.matrix(era3_nospecies, pars = c("beta1", "beta2", "beta3"))
+# coef_nospecies <- data.frame(era1 = beta[ , 1],
+#                              era2 = beta[ , 2],
+#                              era3 = beta[ , 3])
+# mdf_nospecies <- reshape2::melt(coef_nospecies)
+# 
+# g <- ggplot(mdf_nospecies, aes(x = value, fill = variable)) +
+#     theme_bw() +
+#     geom_density(alpha = 0.7) +
+#     scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+#     geom_vline(xintercept = 0, lty = 2) +
+#     labs(x = "Slope",
+#          y = "Posterior density",
+#          fill = "Era",
+#          title = "No species")
+# print(g)
+# 
+# 
+# ## Use rstanarm
+# era3_nospecies_arm <- stan_glm(catch ~ pdo + pdo:era, data = dat3,
+#                                chains = 4, cores = 4, thin = 1,
+#                                warmup = 1000, iter = 4000, refresh = 0)
+# print(era3_nospecies_arm)
+# 
+# beta_arm <- as.matrix(era3_nospecies_arm, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
+# coef_nospecies_arm <- data.frame(era1 = beta_arm[ , 1],
+#                                  era2 = beta_arm[ , 1] + beta_arm[ , 2],
+#                                  era3 = beta_arm[ , 1] + beta_arm[ , 3])
+# mdf_nospecies_arm <- reshape2::melt(coef_nospecies_arm)
+# 
+# g <- ggplot(mdf_nospecies_arm, aes(x = value, fill = variable)) +
+#     theme_bw() +
+#     geom_density(alpha = 0.7) +
+#     scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+#     geom_vline(xintercept = 0, lty = 2) +
+#     labs(x = "Slope",
+#          y = "Posterior density",
+#          fill = "Era",
+#          title = "No species: rstanarm")
+# print(g)
+# 
+# 
+# 
+# ## 3 era: species fit independently ------------------------
+# 
+# ## Use hand-coded Stan model
+# stan_era3_indv <- stan_model("era3_indv.stan")
+# 
+# era3_indv <- sampling(stan_era3_indv, data = dat3_stan,
+#                       pars = "yhat", include = FALSE,
+#                       chains = 4, cores = 4, thin = 1,
+#                       warmup = 1000, iter = 4000, refresh = 0)
+# print(era3_indv)
+# check_divergences(era3_indv)
+# 
+# species <- unique(dat3$species)
+# lst <- vector("list", length(species))
+# for(i in seq_along(species)) {
+#     b1 <- paste0("beta1[", i, "]")
+#     b2 <- paste0("beta2[", i, "]")
+#     b3 <- paste0("beta3[", i, "]")
+#     beta <- as.matrix(era3_indv, pars = c(b1, b2, b3))
+#     df <- data.frame(species = species[i],
+#                      era1 = beta[ , 1],
+#                      era2 = beta[ , 2],
+#                      era3 = beta[ , 3])
+#     lst[[i]] <- reshape2::melt(df, id.vars = "species")
+# }
+# mdf_indv <- plyr::rbind.fill(lst)
+# 
+# g <- ggplot(mdf_indv, aes(x = value, fill = variable)) +
+#     theme_bw() +
+#     geom_density(alpha = 0.7) +
+#     scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+#     geom_vline(xintercept = 0, lty = 2) +
+#     labs(x = "Slope",
+#          y = "Posterior density",
+#          fill = "Era",
+#          title = "Species independent") +
+#     facet_wrap( ~ species)
+# print(g)
+# 
+# 
+# ## Using rstanarm
+# era3_sock <- stan_glm(catch ~ pdo + pdo:era,
+#                       data = dat3[dat3$species == "Sockeye", ],
+#                       chains = 4, cores = 4, thin = 1,
+#                       warmup = 1000, iter = 4000, refresh = 0)
+# era3_pinke <- stan_glm(catch ~ pdo + pdo:era,
+#                        data = dat3[dat3$species == "Pink-even", ],
+#                        chains = 4, cores = 4, thin = 1,
+#                        warmup = 1000, iter = 4000, refresh = 0)
+# era3_pinko <- stan_glm(catch ~ pdo + pdo:era,
+#                        data = dat3[dat3$species == "Pink-odd", ],
+#                        chains = 4, cores = 4, thin = 1,
+#                        warmup = 1000, iter = 4000, refresh = 0)
+# era3_coho <- stan_glm(catch ~ pdo + pdo:era,
+#                       data = dat3[dat3$species == "Coho", ],
+#                       chains = 4, cores = 4, thin = 1,
+#                       warmup = 1000, iter = 4000, refresh = 0)
+# 
+# lst <- list(era3_sock, era3_pinke, era3_pinko, era3_coho)
+# lst <- lapply(lst, function(x) {
+#     beta <- as.matrix(x, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
+#     data.frame(Species = unique(x$data$species),
+#                era1 = beta[ , 1],
+#                era2 = beta[ , 1] + beta[ , 2],
+#                era3 = beta[ , 1] + beta[ , 3])
+# })
+# coef_indv_arm <- plyr::rbind.fill(lst)
+# mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "Species")
+# 
+# g <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
+#     theme_bw() +
+#     geom_density(alpha = 0.7) +
+#     scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+#     geom_vline(xintercept = 0, lty = 2) +
+#     labs(x = "Slope",
+#          y = "Posterior density",
+#          fill = "Era",
+#          title = "Species independent: rstanarm") +
+#     facet_wrap( ~ Species)
+# print(g)
+# 
 
 
 ## 3 era: hierarchical -------------------------------------
@@ -277,13 +278,16 @@ coef_hier_arm <- data.frame(era1 = mu_beta_arm[ , 1],
                             era3 = mu_beta_arm[ , 1] + mu_beta_arm[ , 3])
 mdf_hier_arm <- reshape2::melt(coef_hier_arm)
 
-g <- ggplot(mdf_hier_arm, aes(x = value, fill = variable)) +
+slopes <- ggplot(mdf_hier_arm, aes(x = value, fill = variable)) +
     theme_bw() +
     geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+    scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1965-1988", "1989-2013", "2014-2019")) +
     geom_vline(xintercept = 0, lty = 2) +
     labs(x = "Slope",
-         y = "Posterior density",
-         fill = "Era",
-         title = "Group level means: rstanarm")
-print(g)
+         y = "Posterior density") +
+    theme(legend.title = element_blank(), legend.position = 'top', legend.direction = "horizontal")
+print(slopes)
+
+png("era-specific catches and PDO.png", 8, 3, units='in', res=300)
+ggarrange(scatter, slopes, ncol=2, nrow=1, labels=c("a)", "b)"), widths = c(1, 0.7))
+dev.off()
