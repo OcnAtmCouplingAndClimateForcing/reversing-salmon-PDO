@@ -1,5 +1,5 @@
 ## Bayesian Catch:PDO reversal analysis
-
+library(tidyverse)
 library(rstan)
 library(ggplot2)
 library(plyr)
@@ -86,11 +86,47 @@ scatter <- ggplot(dat3) +
     theme_bw() + ylab("Catch anomaly") + xlab("PDO (Nov-Mar, 3-yr running mean)") +
     theme(legend.title = element_blank())
 
-
 print(scatter)
 
+# and make a scatter plot across all three eras for talk!
+dat4 <- dat3 %>%
+  group_by(Year) %>%
+  mutate(mean.catch=mean(catch)) %>%
+  select(Year, PDO3, mean.catch)
+
+dat4$all.era <- "1965-2019"
+
+scatter2 <- ggplot(dat4) +
+  aes(x = PDO3, y = mean.catch) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap( ~all.era) +
+  theme_bw() + ylab("Catch anomaly") + xlab("PDO (Nov-Mar, 3-yr running mean)") +
+  theme(legend.title = element_blank())
+
+print(scatter2)
+
+ggsave("time-insensitive catch-pdo regression.png", width=4, height=3, units='in')
+
+mod <- lm(mean.catch ~ PDO3, data=dat4)
+
+resids <- data.frame(Year = dat4$Year, Residual=residuals(mod))
+
+scatter3 <- ggplot(resids) +
+  aes(x = Year, y = Residual) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  geom_hline(yintercept = 0, lty=2) +
+  theme(axis.title.x = element_blank()) +
+  scale_x_continuous(breaks = seq(1970, 2020, 10))
+
+print(scatter3)
+
+ggsave("time-insensitive catch-pdo residuals.png", width=4, height=3, units='in')
 
 
+acf(resids$Residual)
 # ## 3 era: no species ---------------------------------------
 # 
 # ## Use hand-coded Stan model
@@ -263,6 +299,7 @@ print(g)
 
 
 ## Using rstanarm
+# era3_hier_arm <- stan_glmer(catch ~ era + pdo + pdo:era + (era + pdo + pdo:era | species),
 era3_hier_arm <- stan_glmer(catch ~ pdo + pdo:era + (pdo + pdo:era | species),
                             data = dat3,
                             chains = 4, cores = 4, thin = 1,
@@ -270,6 +307,7 @@ era3_hier_arm <- stan_glmer(catch ~ pdo + pdo:era + (pdo + pdo:era | species),
 fixef(era3_hier_arm)
 ranef(era3_hier_arm)
 coef(era3_hier_arm)
+era3_hier_arm$covmat
 print(era3_hier_arm)
 
 mu_beta_arm <- as.matrix(era3_hier_arm, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
@@ -287,6 +325,7 @@ slopes <- ggplot(mdf_hier_arm, aes(x = value, fill = variable)) +
          y = "Posterior density") +
     theme(legend.title = element_blank(), legend.position = 'top', legend.direction = "horizontal")
 print(slopes)
+
 
 png("era-specific catches and PDO.png", 8, 3, units='in', res=300)
 ggarrange(scatter, slopes, ncol=2, nrow=1, labels=c("a)", "b)"), widths = c(1, 0.7))
