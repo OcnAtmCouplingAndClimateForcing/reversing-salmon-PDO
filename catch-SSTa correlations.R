@@ -13,6 +13,7 @@ library(fields)
 library(maptools)
 library(mapdata)
 library(zoo)
+library(oce)
 
 # # I have catch data in spearate files for each management area
 # # clean up and combine data sets
@@ -288,11 +289,14 @@ for(j in 1:ncol(win.SST)){
 png("correlations with 3-yr smoothed winter sst sockeye pink coho.png", 6, 6, units="in", res=300)
 
 par(mfrow=c(3,3), mar=c(0,0.5,1.5,0.5), oma=c(2,2,2,0))
-new.col <- tim.colors(64)
-grays <- c("gray90", "gray89", "gray88",
-           "gray87","gray86")
+# new.col <- tim.colors(64)
+# grays <- c("gray90", "gray89", "gray88",
+#            "gray87","gray86")
+# 
+# new.col[27:36] <- c(grays[5:1], grays[1:5])
 
-new.col[27:36] <- c(grays[5:1], grays[1:5])
+new.col <- oceColorsPalette(64)
+
 lim <- c(-1,1)
 # first, sockeye
 z <- t(matrix(winter.sockeye.65.88,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
@@ -429,4 +433,14 @@ map('world2Hires',fill=F, xlim=c(130,250), ylim=c(20,66),add=T, lwd=1)
 # mtext("Coho v. winter sst 2014-2019")
 
 dev.off()
+
+library(oce)
+
+col <- oceColorsPalette(64)
+
+z <- t(matrix(winter.coho.14.19,length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+imagep(sst.x,sst.y,z, zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
+
+image(sst.x,sst.y,z, col=col, 
+      zlim=lim, ylim=c(20,66), yaxt="n", xaxt="n", xlab="", ylab="")
 
