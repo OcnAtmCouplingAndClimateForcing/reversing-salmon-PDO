@@ -271,62 +271,157 @@ acf(resids$Residual)
 ## transitions. The beta hyper-means and SDs appear to be the problem.
 
 
-stan_era3_hier <- stan_model("era3_hier.stan")
+## stan_era3_hier <- stan_model("era3_hier.stan")
 
-era3_hier <- sampling(stan_era3_hier, data = dat3_stan,
-                      pars = "yhat", include = FALSE,
-                      chains = 4, cores = 4, thin = 1,
-                      warmup = 1000, iter = 4000, refresh = 0)
-print(era3_hier)
-check_divergences(era3_hier)
+## era3_hier <- sampling(stan_era3_hier, data = dat3_stan,
+##                       pars = "yhat", include = FALSE,
+##                       chains = 4, cores = 4, thin = 1,
+##                       warmup = 1000, iter = 4000, refresh = 0)
+## print(era3_hier)
+## check_divergences(era3_hier)
 
-mu_beta <- as.matrix(era3_hier, pars = c("mu_beta1", "mu_beta2", "mu_beta3"))
-coef_hier <- data.frame(era1 = mu_beta[ , 1],
-                        era2 = mu_beta[ , 2],
-                        era3 = mu_beta[ , 3])
-mdf_hier <- reshape2::melt(coef_hier)
+## mu_beta <- as.matrix(era3_hier, pars = c("mu_beta1", "mu_beta2", "mu_beta3"))
+## coef_hier <- data.frame(era1 = mu_beta[ , 1],
+##                         era2 = mu_beta[ , 2],
+##                         era3 = mu_beta[ , 3])
+## mdf_hier <- reshape2::melt(coef_hier)
 
-g <- ggplot(mdf_hier, aes(x = value, fill = variable)) +
-    theme_bw() +
-    geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
-    geom_vline(xintercept = 0, lty = 2) +
-    labs(x = "Slope",
-         y = "Posterior density",
-         fill = "Era",
-         title = "Group level means")
-print(g)
+## g <- ggplot(mdf_hier, aes(x = value, fill = variable)) +
+##     theme_bw() +
+##     geom_density(alpha = 0.7) +
+##     scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+##     geom_vline(xintercept = 0, lty = 2) +
+##     labs(x = "Slope",
+##          y = "Posterior density",
+##          fill = "Era",
+##          title = "Group level means")
+## print(g)
 
 
-## Using rstanarm
-# era3_hier_arm <- stan_glmer(catch ~ era + pdo + pdo:era + (era + pdo + pdo:era | species),
-era3_hier_arm <- stan_glmer(catch ~ pdo + pdo:era + (pdo + pdo:era | species),
-                            data = dat3,
-                            chains = 4, cores = 4, thin = 1,
-                            warmup = 1000, iter = 4000, refresh = 0)
+## 3 era: hierarchical --> model for manuscript ----------------
+era3_hier_arm <- stan_glmer(catch ~ era + pdo + pdo:era + (era + pdo + pdo:era | species),
+                    data = dat3,
+                    chains = 4, cores = 4, thin = 1,
+                    warmup = 1000, iter = 4000, refresh = 0,
+                    adapt_delta = 0.99,
+                    prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE),
+                    prior_covariance = decov(regularization = 1,
+                                             concentration = 1,
+                                             shape = 1, scale = 1))
+
 fixef(era3_hier_arm)
 ranef(era3_hier_arm)
 coef(era3_hier_arm)
 era3_hier_arm$covmat
 print(era3_hier_arm)
 
-mu_beta_arm <- as.matrix(era3_hier_arm, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
-coef_hier_arm <- data.frame(era1 = mu_beta_arm[ , 1],
-                            era2 = mu_beta_arm[ , 1] + mu_beta_arm[ , 2],
-                            era3 = mu_beta_arm[ , 1] + mu_beta_arm[ , 3])
-mdf_hier_arm <- reshape2::melt(coef_hier_arm)
+mu_beta  <- as.matrix(era3_hier_arm, pars = c("pdo", "eraera2:pdo", "eraera3:pdo"))
+coef_beta <- data.frame(coef = "Slope",
+                        era1 = mu_beta[ , 1],
+                        era2 = mu_beta[ , 1] + mu_beta[ , 2],
+                        era3 = mu_beta[ , 1] + mu_beta[ , 3])
+mu_alpha <- as.matrix(era3_hier_arm, pars = c("(Intercept)", "eraera2", "eraera3"))
+coef_alpha <- data.frame(coef = "Intercept",
+                         era1 = mu_alpha[ , 1],
+                         era2 = mu_alpha[ , 1] + mu_alpha[ , 2],
+                         era3 = mu_alpha[ , 1] + mu_alpha[ , 3])
+mbeta  <- reshape2::melt(coef_beta, id.vars = "coef")
+malpha <- reshape2::melt(coef_alpha, id.vars = "coef")
+mdf_hier <- rbind(mbeta, malpha)
 
-slopes <- ggplot(mdf_hier_arm, aes(x = value, fill = variable)) +
+
+
+slopes <- ggplot(mbeta, aes(x = value, fill = variable)) +
     theme_bw() +
     geom_density(alpha = 0.7) +
-    scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1965-1988", "1989-2013", "2014-2019")) +
+    scale_fill_manual(values = c(cb[2], cb[3], cb[4]),
+                      labels=c("1965-1988", "1989-2013", "2014-2019")) +
     geom_vline(xintercept = 0, lty = 2) +
     labs(x = "Slope",
          y = "Posterior density") +
-    theme(legend.title = element_blank(), legend.position = 'top', legend.direction = "horizontal")
+    theme(legend.title = element_blank(), legend.position = 'top',
+          legend.direction = "horizontal")
 print(slopes)
 
 
+
 png("era-specific catches and PDO.png", 8, 3, units='in', res=300)
-ggarrange(scatter, slopes, ncol=2, nrow=1, labels=c("a)", "b)"), widths = c(1, 0.7))
+ggpubr::ggarrange(scatter, slopes, ncol=2, nrow=1, labels=c("a)", "b)"), widths = c(1, 0.7))
 dev.off()
+
+
+## Diagnostics
+posterior <- as.array(era3_hier_arm)
+mcmc_rhat(rhat(era3_hier_arm))
+mcmc_neff(neff_ratio(era3_hier_arm))
+mcmc_trace(posterior)
+ppc_dens_overlay(y = dat3$catch, yrep = posterior_predict(era3_hier_arm, draws = 100))
+mcmc_areas(posterior,
+           pars = c("pdo", "eraera2:pdo", "eraera3:pdo"),
+           prob = 0.95)
+range(summary(era3_hier_arm[["stanfit"]])[["summary"]][ , "n_eff"])
+range(summary(era3_hier_arm[["stanfit"]])[["summary"]][ , "Rhat"])
+
+
+## Plot slope and intercepts
+g <- ggplot(mdf_hier, aes(x = value, fill = variable)) +
+    theme_bw() +
+    geom_density(alpha = 0.7, adjust = 1.5) +
+    scale_fill_manual(values = c(cb[2], cb[3], cb[4])) +
+    geom_vline(xintercept = 0, lty = 2) +
+    labs(x = "Coefficient",
+         y = "Posterior density",
+         fill = "Era",
+         title = "Group level means") +
+    facet_wrap( ~ coef)
+print(g)
+
+
+## Plot group-level regression lines
+coef_tab <- plyr::ddply(mdf_hier, .(coef, variable), summarize,
+                        mean = mean(value),
+                        lower95 = quantile(value, probs = 0.025),
+                        upper95 = quantile(value, probs = 0.975))
+
+coef_mean <- data.frame(era = unique(dat3[["era"]]),
+                        intercept = coef_tab$mean[coef_tab$coef == "Intercept"],
+                        slope = coef_tab$mean[coef_tab$coef == "Slope"])
+
+g <- ggplot(dat3) +
+    aes(x = pdo, y = catch, color = species) +
+    geom_point() +
+    geom_abline(data = coef_mean, aes(slope = slope, intercept = intercept)) +
+    facet_wrap( ~ era) +
+    scale_color_manual(values=c(cb[2], cb[7], cb[6], cb[4])) +
+    theme_bw()
+print(g)
+
+
+## Plot species-specific regression lines
+## We get almost complete shrinkage to the mean
+cf <- coef(era3_hier_arm)[["species"]]
+e1 <- data.frame(species = rownames(cf),
+                 era = "era1",
+                 intercept = cf[["(Intercept)"]],
+                 slope = cf[["pdo"]])
+e2 <- data.frame(species = rownames(cf),
+                 era = "era2",
+                 intercept = cf[["(Intercept)"]] + cf[["eraera2"]],
+                 slope = cf[["pdo"]] + cf[["eraera2:pdo"]])
+e3 <- data.frame(species = rownames(cf),
+                 era = "era3",
+                 intercept = cf[["(Intercept)"]] + cf[["eraera3"]],
+                 slope = cf[["pdo"]] + cf[["eraera3:pdo"]])
+coef_sp <- rbind(e1, e2, e3)
+
+g <- ggplot(dat3) +
+    aes(x = pdo, y = catch, color = species) +
+    geom_point() +
+    geom_abline(data = coef_sp, aes(slope = slope, intercept = intercept, color = species)) +
+    facet_wrap( ~ era) +
+    scale_color_manual(values=c(cb[2], cb[7], cb[6], cb[4])) +
+    labs(x = "PDO", y = "Catch anomaly", color = "Species") +
+    theme_bw()
+print(g)
