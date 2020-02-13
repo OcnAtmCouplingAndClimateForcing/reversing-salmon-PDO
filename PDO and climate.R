@@ -10,7 +10,7 @@ library(tidyr)
 library(nlme)
 library(ggplot2)
 library(MARSS)
-
+library(overlapping)
 
 dat <- read.csv("data/climate.data.csv", row.names = 1)
 cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -22,15 +22,15 @@ dat <- dat %>%
 # now plot relative to PDO!
 colnames(dat)[c(2,3,5,6)] <- c("Sea surface height (m, Feb-Apr)",
                                "Wind stress (pa, Feb-Apr)",
-                               "Sea surface temp. (ºC, Nov-Mar)", 
+                               "Sea surface temp. (ºC, Nov-Mar)",
                              "North Pacific Index (mb, Nov-Mar)")
 dat <- dat %>%
   gather(key, value, -NDJFM.PDO, -era)
 
-dat$plot.era <- ifelse(dat$era==1, "1964-1988", 
+dat$plot.era <- ifelse(dat$era==1, "1964-1988",
                        ifelse(dat$era==2, "1989-2013", "2014-2019"))
 
-dat$key.order <- ifelse(dat$key=="North Pacific Index (mb, Nov-Mar)", 1, 
+dat$key.order <- ifelse(dat$key=="North Pacific Index (mb, Nov-Mar)", 1,
                         ifelse(dat$key=="Sea surface temp. (ºC, Nov-Mar)", 2,
                         ifelse(dat$key=="Sea surface height (m, Feb-Apr)", 3, 4)))
 
@@ -38,10 +38,10 @@ dat$key <- reorder(dat$key, dat$key.order)
 
 scatter <- ggplot(dat, aes(NDJFM.PDO, value, color=plot.era)) +
   theme_bw() +
-  geom_point() + 
-  facet_wrap(~key, scales="free_y") + 
-  scale_color_manual(values=cb[2:4]) + 
-  geom_smooth(method="lm", se=F) + 
+  geom_point() +
+  facet_wrap(~key, scales="free_y") +
+  scale_color_manual(values=cb[2:4]) +
+  geom_smooth(method="lm", se=F) +
   xlab("PDO Index (Nov-Mar)") +
   theme(legend.title = element_blank(), axis.title.y = element_blank())
 
@@ -54,7 +54,7 @@ library(plyr)
 library(rstanarm)
 library(bayesplot)
 
-# rename pdo 
+# rename pdo
 names(dat)[2] <- "pdo"
 
 #era as function
@@ -127,10 +127,22 @@ lst <- lapply(lst, function(x) {
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
+for(i in 1:length(unique(coef_indv_arm$key))) {
+
+  sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
+  # calculate pairwise overlaps in slopes and intercepts
+  int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
+  saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_int_overlap.rds"))
+}
+
+
+
 int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
                        mean = mean(value),
                        lower95 = quantile(value, probs = 0.025),
                        upper95 = quantile(value, probs = 0.975))
+
+
 
 int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   theme_bw() +
@@ -140,7 +152,7 @@ int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   geom_vline(xintercept = 0, lty = 2) +
   labs(x = "Intercept (scaled anomaly)",
        y = "Posterior density") +
-  facet_wrap( ~ key, scales="free") 
+  facet_wrap( ~ key, scales="free")
 print(int)
 
 <<<<<<< HEAD
@@ -162,6 +174,17 @@ lst <- lapply(lst, function(x) {
 })
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
+
+
+for(i in 1:length(unique(coef_indv_arm$key))) {
+
+  sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
+  # calculate pairwise overlaps in slopes and intercepts
+  int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
+  saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_int_overlap.rds"))
+}
+
+
 
 # make a combined plot
 library(ggpubr)
