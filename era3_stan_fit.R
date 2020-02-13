@@ -5,6 +5,7 @@ library(rstan)
 library(ggplot2)
 library(rstanarm)
 library(bayesplot)
+library(overlapping)
 
 # NOTE THAT THESE YEARS ARE ALREADY LAGGED TO ENTRY YEAR
 raw.dat <- read.csv("salmon.and.covariate.data.csv")
@@ -50,7 +51,7 @@ ggplot(dummy.density, aes(y, fill=era)) +
   ylab("Probability density") +
   xlab("Slope") +
   theme(legend.position = c(0.8, 0.8), legend.title = element_blank())
-  
+
 
 ggsave("slope dummy two era plot.png", width=3, height=2.5, units="in")
 
@@ -73,7 +74,7 @@ ggplot(plot.dat, aes(Year, value, fill=color)) +
   ylab("Anomaly") +
   geom_hline(yintercept = 0, color="dark grey") +
   geom_vline(xintercept = 1988.5, lty=2)
-                      
+
 ggsave("pdo and goa catch barplot.png", width=3.5, height=4, units="in")
 
 # now a dummy example plot
@@ -93,7 +94,7 @@ pdo3 <- zoo::rollmean(tapply(pdo$value, pdo$YEAR, mean), 3, fill=NA)
 error <- rnorm(length(pdo3), 0, 1)
 y <- pdo3 + error
 
-dummy.plot <- data.frame(year=1930:1995, 
+dummy.plot <- data.frame(year=1930:1995,
                          pdo=pdo3,
                          y <- scale(y))
 
@@ -113,7 +114,7 @@ ggplot(dummy.plot, aes(year, value, fill=color)) +
   theme(legend.position = 'none', axis.title.x = element_blank()) +
   scale_fill_manual(values=c("blue", "red")) +
   ylab("Anomaly") +
-  geom_hline(yintercept = 0, color="dark grey") 
+  geom_hline(yintercept = 0, color="dark grey")
 
 ggsave("pdo and biology dummy barplot.png", width=3.5, height=4, units="in")
 
@@ -254,23 +255,23 @@ ggsave("time-insensitive catch-pdo residuals.png", width=4, height=3, units='in'
 
 acf(resids$Residual)
 # ## 3 era: no species ---------------------------------------
-# 
+#
 # ## Use hand-coded Stan model
 # stan_era3_nospecies <- stan_model("era3_nospecies.stan")
-# 
+#
 # era3_nospecies <- sampling(stan_era3_nospecies, data = dat3_stan,
 #                            pars = "yhat", include = FALSE,
 #                            chains = 4, cores = 4, thin = 1,
 #                            warmup = 1000, iter = 4000, refresh = 0)
 # print(era3_nospecies)
 # check_divergences(era3_nospecies)
-# 
+#
 # beta <- as.matrix(era3_nospecies, pars = c("beta1", "beta2", "beta3"))
 # coef_nospecies <- data.frame(era1 = beta[ , 1],
 #                              era2 = beta[ , 2],
 #                              era3 = beta[ , 3])
 # mdf_nospecies <- reshape2::melt(coef_nospecies)
-# 
+#
 # g <- ggplot(mdf_nospecies, aes(x = value, fill = variable)) +
 #     theme_bw() +
 #     geom_density(alpha = 0.7) +
@@ -281,20 +282,20 @@ acf(resids$Residual)
 #          fill = "Era",
 #          title = "No species")
 # print(g)
-# 
-# 
+#
+#
 # ## Use rstanarm
 # era3_nospecies_arm <- stan_glm(catch ~ pdo + pdo:era, data = dat3,
 #                                chains = 4, cores = 4, thin = 1,
 #                                warmup = 1000, iter = 4000, refresh = 0)
 # print(era3_nospecies_arm)
-# 
+#
 # beta_arm <- as.matrix(era3_nospecies_arm, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
 # coef_nospecies_arm <- data.frame(era1 = beta_arm[ , 1],
 #                                  era2 = beta_arm[ , 1] + beta_arm[ , 2],
 #                                  era3 = beta_arm[ , 1] + beta_arm[ , 3])
 # mdf_nospecies_arm <- reshape2::melt(coef_nospecies_arm)
-# 
+#
 # g <- ggplot(mdf_nospecies_arm, aes(x = value, fill = variable)) +
 #     theme_bw() +
 #     geom_density(alpha = 0.7) +
@@ -305,21 +306,21 @@ acf(resids$Residual)
 #          fill = "Era",
 #          title = "No species: rstanarm")
 # print(g)
-# 
-# 
-# 
+#
+#
+#
 # ## 3 era: species fit independently ------------------------
-# 
+#
 # ## Use hand-coded Stan model
 # stan_era3_indv <- stan_model("era3_indv.stan")
-# 
+#
 # era3_indv <- sampling(stan_era3_indv, data = dat3_stan,
 #                       pars = "yhat", include = FALSE,
 #                       chains = 4, cores = 4, thin = 1,
 #                       warmup = 1000, iter = 4000, refresh = 0)
 # print(era3_indv)
 # check_divergences(era3_indv)
-# 
+#
 # species <- unique(dat3$species)
 # lst <- vector("list", length(species))
 # for(i in seq_along(species)) {
@@ -334,7 +335,7 @@ acf(resids$Residual)
 #     lst[[i]] <- reshape2::melt(df, id.vars = "species")
 # }
 # mdf_indv <- plyr::rbind.fill(lst)
-# 
+#
 # g <- ggplot(mdf_indv, aes(x = value, fill = variable)) +
 #     theme_bw() +
 #     geom_density(alpha = 0.7) +
@@ -346,8 +347,8 @@ acf(resids$Residual)
 #          title = "Species independent") +
 #     facet_wrap( ~ species)
 # print(g)
-# 
-# 
+#
+#
 # ## Using rstanarm
 # era3_sock <- stan_glm(catch ~ pdo + pdo:era,
 #                       data = dat3[dat3$species == "Sockeye", ],
@@ -365,7 +366,7 @@ acf(resids$Residual)
 #                       data = dat3[dat3$species == "Coho", ],
 #                       chains = 4, cores = 4, thin = 1,
 #                       warmup = 1000, iter = 4000, refresh = 0)
-# 
+#
 # lst <- list(era3_sock, era3_pinke, era3_pinko, era3_coho)
 # lst <- lapply(lst, function(x) {
 #     beta <- as.matrix(x, pars = c("pdo", "pdo:eraera2", "pdo:eraera3"))
@@ -376,7 +377,7 @@ acf(resids$Residual)
 # })
 # coef_indv_arm <- plyr::rbind.fill(lst)
 # mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "Species")
-# 
+#
 # g <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
 #     theme_bw() +
 #     geom_density(alpha = 0.7) +
@@ -388,7 +389,7 @@ acf(resids$Residual)
 #          title = "Species independent: rstanarm") +
 #     facet_wrap( ~ Species)
 # print(g)
-# 
+#
 
 
 ## 3 era: hierarchical -------------------------------------
@@ -457,7 +458,12 @@ mbeta  <- reshape2::melt(coef_beta, id.vars = "coef")
 malpha <- reshape2::melt(coef_alpha, id.vars = "coef")
 mdf_hier <- rbind(mbeta, malpha)
 
+# calculate pairwise overlaps in slopes and intercepts
+slope_overlap = overlapping::overlap(x = list(slope1 = mu_beta[,1],slope2=mu_beta[,2],slope3=mu_beta[,3]))
+int_overlap = overlapping::overlap(x = list(int1 = mu_alpha[ , 1],int2=mu_alpha[ , 2],int3=mu_alpha[ , 3]))
 
+saveRDS(int_overlap$OV,file="salmon_int_overlap.rds")
+saveRDS(slope_overlap$OV,file="salmon_slope_overlap.rds")
 
 slopes <- ggplot(mbeta, aes(x = value, fill = variable)) +
     theme_bw() +
