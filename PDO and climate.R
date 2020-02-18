@@ -93,9 +93,9 @@ era_NPI_2 <- stan_glm(value ~ era + pdo,
                       data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
-                      prior = normal(location = location, scale = 5*scale, autoscale = FALSE),
-                      prior_intercept = normal(location = location, scale = 5*scale, autoscale = FALSE),
-                      prior_aux = student_t(df = 3, location = location, scale = 5*scale, autoscale = FALSE))
+                      prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_intercept = normal(location = location, scale = 5, autoscale = FALSE),
+                      prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_stress_2 <- stan_glm(value ~ era + pdo,
                          data = dat[dat$key == "Wind stress (Feb-Apr)", ],
