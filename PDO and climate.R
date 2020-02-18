@@ -160,14 +160,13 @@ int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   facet_wrap( ~ key, scales="free")
 print(int)
 
-<<<<<<< HEAD
 # make a combined plot
 library(ggpubr)
 
 png("era-specific PDO and climate.png", 6.5, 7.5, units='in', res=300)
 ggarrange(scatter, int, ncol=1, nrow=2, labels=c("a)", "b)"))
 dev.off()
-=======
+
 lst <- list(era_NPI_2, era_stress_2, era_SSH_2, era_SST_2)
 
 lst <- lapply(lst, function(x) {
@@ -197,7 +196,7 @@ library(ggpubr)
 png("era-specific PDO and climate.png", 6, 10, units='in', res=300)
 ggarrange(scatter, int, ncol=1, nrow=3)
 dev.off()
->>>>>>> 56532b40c36f9c08c902e9cf4c0d0008c147d926
+
 
 
 ## Bayesian model diagnostics
