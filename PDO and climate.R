@@ -179,14 +179,14 @@ lst <- lapply(lst, function(x) {
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
-
-for(i in 1:length(unique(coef_indv_arm$key))) {
-
-  sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
-  # calculate pairwise overlaps in slopes and intercepts
-  int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
-  saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
-}
+# Commented out -- EW was testing with version of the model with interactions
+# for(i in 1:length(unique(coef_indv_arm$key))) {
+#
+#   sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
+#   # calculate pairwise overlaps in slopes and intercepts
+#   int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
+#   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
+# }
 
 
 
