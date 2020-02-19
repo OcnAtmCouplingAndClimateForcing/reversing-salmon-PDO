@@ -311,6 +311,6 @@ print(int)
 # make a combined plot
 library(ggpubr)
 
-png("era-specific PDO and climate.png", 6.5, 7.5, units='in', res=300)
+png("era-specific PDO - Papa and salinity.png", 6.5, 5, units='in', res=300)
 ggarrange(scatter, int, ncol=1, nrow=2, labels=c("a)", "b)"))
 dev.off()
