@@ -64,16 +64,16 @@ dat$era <- as.factor(dat$era)
 dat$key <- as.character(dat$key)
 
 change <- grep("North P", dat$key)
-dat$key[change] <- "North Pacific Index (Nov-Mar)"
+dat$key[change] <- "North Pacific Index (mb, Nov-Mar)"
 
 change <- grep("Wind", dat$key)
-dat$key[change] <- "Wind stress (Feb-Apr)"
+dat$key[change] <- "Wind stress (pa, Feb-Apr)"
 
 change <- grep("height", dat$key)
-dat$key[change] <- "Sea surface height (Feb-Apr)"
+dat$key[change] <- "Sea surface height (m, Feb-Apr)"
 
 change <- grep("temp", dat$key)
-dat$key[change] <- "Sea surface temp. (Nov-Mar)"
+dat$key[change] <- "Sea surface temp. (ºC, Nov-Mar)"
 
 dat$key <- factor(dat$key)
 dat$key <- reorder(dat$key, dat$key.order)
@@ -85,12 +85,10 @@ dat$key <- reorder(dat$key, dat$key.order)
 
 # getting odd results centered around 0 for NPI...try with priors in original units?
 
-location <- mean(dat$value[dat$key == "North Pacific Index (Nov-Mar)"])
-scale <- sd(dat$value[dat$key == "North Pacific Index (Nov-Mar)"])
-
+location <- mean(dat$value[dat$key == "North Pacific Index (mb, Nov-Mar)"])
 
 era_NPI_2 <- stan_glm(value ~ era + pdo,
-                      data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
+                      data = dat[dat$key == "North Pacific Index (mb, Nov-Mar)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -98,7 +96,7 @@ era_NPI_2 <- stan_glm(value ~ era + pdo,
                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_stress_2 <- stan_glm(value ~ era + pdo,
-                         data = dat[dat$key == "Wind stress (Feb-Apr)", ],
+                         data = dat[dat$key == "Wind stress (pa, Feb-Apr)", ],
                          chains = 4, cores = 4, thin = 1,
                          warmup = 1000, iter = 4000, refresh = 0,
                          prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -106,7 +104,7 @@ era_stress_2 <- stan_glm(value ~ era + pdo,
                          prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_SSH_2 <- stan_glm(value ~ era + pdo,
-                      data = dat[dat$key == "Sea surface height (Feb-Apr)", ],
+                      data = dat[dat$key == "Sea surface height (m, Feb-Apr)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -114,7 +112,7 @@ era_SSH_2 <- stan_glm(value ~ era + pdo,
                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_SST_2 <- stan_glm(value ~ era + pdo,
-                      data = dat[dat$key == "Sea surface temp. (Nov-Mar)", ],
+                      data = dat[dat$key == "Sea surface temp. (ºC, Nov-Mar)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -155,7 +153,7 @@ int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   geom_density(alpha = 0.7) +
   scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
   theme(legend.title = element_blank()) +
-  labs(x = "Intercept (scaled anomaly)",
+  labs(x = "Intercept",
        y = "Posterior density") +
   facet_wrap( ~ key, scales="free")
 print(int)
