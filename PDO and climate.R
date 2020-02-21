@@ -135,6 +135,17 @@ for(i in 1:length(unique(coef_indv_arm$key))) {
   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_int_overlap.rds"))
 }
 
+## extract slopes
+lst <- list(era_NPI_2, era_stress_2, era_SSH_2, era_SST_2)
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("pdo", "era2:pdo", "era3:pdo"))
+  data.frame(key = unique(x$data$key),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2],
+             era3 = beta[ , 1] + beta[ , 3])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
 
 int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
@@ -142,6 +153,10 @@ int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
                        lower95 = quantile(value, probs = 0.025),
                        upper95 = quantile(value, probs = 0.975))
 
+slope_tab <- plyr::ddply(mdf_slope, .(key, variable), summarize,
+                         mean = mean(value),
+                         lower95 = quantile(value, probs = 0.025),
+                         upper95 = quantile(value, probs = 0.975))
 
 
 int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
