@@ -155,42 +155,11 @@ int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   facet_wrap( ~ key, scales="free")
 print(int)
 
-<<<<<<< HEAD
 # make a combined plot
 library(ggpubr)
 
 png("era-specific PDO and climate.png", 6.5, 7.5, units='in', res=300)
 ggarrange(scatter, int, ncol=1, nrow=2, labels=c("a)", "b)"))
-dev.off()
-=======
-lst <- list(era_NPI_2, era_stress_2, era_SSH_2, era_SST_2)
-
-lst <- lapply(lst, function(x) {
-  beta <- as.matrix(x, pars = c("pdo", "era2", "era3"))
-  data.frame(key = unique(x$data$key),
-             era1 = beta[ , 1],
-             era2 = beta[ , 2],
-             era3 = beta[ , 3])
-})
-coef_indv_arm <- plyr::rbind.fill(lst)
-mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
-
-
-for(i in 1:length(unique(coef_indv_arm$key))) {
-
-  sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
-  # calculate pairwise overlaps in slopes and intercepts
-  int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
-  saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
-}
-
-
-
-# make a combined plot
-library(ggpubr)
-
-png("era-specific PDO and climate.png", 6, 10, units='in', res=300)
-ggarrange(scatter, int, ncol=1, nrow=3)
 dev.off()
 
 
