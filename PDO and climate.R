@@ -83,7 +83,7 @@ dat$key <- reorder(dat$key, dat$key.order)
 ## none of the slopes on pdo appear to differ among eras -
 ## try w/ just era & pdo main effects
 
-era_NPI_2 <- stan_glm(scale(value) ~ era + pdo,
+era_NPI_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
@@ -91,7 +91,7 @@ era_NPI_2 <- stan_glm(scale(value) ~ era + pdo,
                       prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
-era_stress_2 <- stan_glm(scale(value) ~ era + pdo,
+era_stress_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                          data = dat[dat$key == "Wind stress (Feb-Apr)", ],
                          chains = 4, cores = 4, thin = 1,
                          warmup = 1000, iter = 4000, refresh = 0,
@@ -99,7 +99,7 @@ era_stress_2 <- stan_glm(scale(value) ~ era + pdo,
                          prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
                          prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
-era_SSH_2 <- stan_glm(scale(value) ~ era + pdo,
+era_SSH_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       data = dat[dat$key == "Sea surface height (Feb-Apr)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
@@ -107,7 +107,7 @@ era_SSH_2 <- stan_glm(scale(value) ~ era + pdo,
                       prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
-era_SST_2 <- stan_glm(scale(value) ~ era + pdo,
+era_SST_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       data = dat[dat$key == "Sea surface temp. (Nov-Mar)", ],
                       chains = 4, cores = 4, thin = 1,
                       warmup = 1000, iter = 4000, refresh = 0,
