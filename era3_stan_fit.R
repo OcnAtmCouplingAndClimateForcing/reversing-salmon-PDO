@@ -38,6 +38,32 @@ ggplot(plot.dat, aes(PDO, mean.catch, color=era)) +
 
 ggsave("AMSS two-era catch vs PDO.png", width=3, height=2.5, units='in')
 
+# now an SST version!
+plot.dat$SST <- (9/5)*raw.dat$SST3[match(plot.dat$Year, raw.dat$Year)]+32
+
+
+ggplot(filter(plot.dat, Year %in% 1963:1988), aes(SST, mean.catch)) +
+  theme_bw() +
+  geom_point(color=cb[2]) +
+  geom_smooth(method="lm", se=F, color=cb[2]) +
+  theme(legend.title = element_blank(), legend.position = 'none') +
+  xlab("Winter temperature (ºF)") +
+  ylab("Catch anomaly")
+
+ggsave("one-era catch vs SST.png", width=3.5, height=2.5, units='in')
+
+
+ggplot(plot.dat, aes(SST, mean.catch, color=era)) +
+  theme_bw() +
+  geom_point() +
+  geom_smooth(method="lm", se=F) +
+  theme(legend.title = element_blank(), legend.position = c(0.78, 0.2)) +
+  scale_color_manual(values=cb[c(2,3)]) +
+  xlab("Winter temperature (ºF)") +
+  ylab("Catch anomaly")
+
+ggsave("two-era catch vs SST.png", width=3.5, height=2.5, units='in')
+
 # and dummy tw0-distribution pdf for slope!
 dummy.density <- data.frame(era=rep(c("1963-1988", "1989-2013"), each=5000),
                             y=c(rnorm(5000, 0.8, 0.1), rnorm(5000, 0.05, 0.15)))
@@ -146,7 +172,9 @@ ggsave("slope dummy plot.png", width=3, height=2.5, units="in")
 ## Prep data -----------------------------------------------
 dat3 <- na.omit(raw.dat)
 dat3 <- plyr::ddply(dat3, .(species), transform, pdo = scale(PDO3))
-dat3 <- plyr::ddply(dat3, .(species), transform, sst = scale(SST3))
+
+dat3 <- plyr::ddply(dat3, .(species), transform, sst = (9/5)*SST3+32) # changing to raw ºF!
+
 dat3$era <- as.factor(dat3$era)
 
 ## Find start and end indices for each species
@@ -214,6 +242,20 @@ scatter <- ggplot(dat3) +
     theme(legend.title = element_blank(), legend.position = 'top')
 
 print(scatter)
+
+# and the same plot for SST for another talk!
+scatter <- ggplot(dat3) +
+  aes(x = sst, y = catch, color = species) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap( ~era.labs) +
+  scale_color_manual(values=c(cb[2], cb[7], cb[6], cb[4])) +
+  theme_bw() + ylab("Catch anomaly") + xlab("Winter sea surface temperature (ºF)") +
+  theme(legend.title = element_blank(), legend.position = 'top')
+
+print(scatter)
+
+ggsave("three panel catch and sst by era.png", width=5, height=3, units='in')
 
 # and make a scatter plot across all three eras for talk!
 dat4 <- dat3 %>%
