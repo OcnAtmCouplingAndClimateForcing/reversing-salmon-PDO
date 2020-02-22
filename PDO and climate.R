@@ -15,7 +15,7 @@ library(overlapping)
 dat <- read.csv("data/climate.data.csv", row.names = 1)
 cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
-# excluding variables showing negative results (these are plotted in a separate script)
+# excluding variables showing negative results (these are plotted separately below)
 dat <- dat %>%
   select(-Papa, -GAK1.sal)
 
@@ -57,6 +57,8 @@ library(bayesplot)
 # rename pdo
 names(dat)[2] <- "pdo"
 
+# remove units for posterior plots
+
 #era as function
 dat$era <- as.factor(dat$era)
 
@@ -80,12 +82,9 @@ dat$key <- reorder(dat$key, dat$key.order)
 
 ## fit a model with era-specific intercepts and slopes
 
-## none of the slopes on pdo appear to differ among eras -
-## try w/ just era & pdo main effects
-
 era_NPI_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
-                      chains = 4, cores = 4, thin = 1,
+                      chains = 4, cores = 4, thin = 1, seed=421,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
                       prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -93,7 +92,7 @@ era_NPI_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
 
 era_stress_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                          data = dat[dat$key == "Wind stress (Feb-Apr)", ],
-                         chains = 4, cores = 4, thin = 1,
+                         chains = 4, cores = 4, thin = 1, seed=421,
                          warmup = 1000, iter = 4000, refresh = 0,
                          prior = normal(location = 0, scale = 5, autoscale = FALSE),
                          prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -101,7 +100,7 @@ era_stress_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
 
 era_SSH_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       data = dat[dat$key == "Sea surface height (Feb-Apr)", ],
-                      chains = 4, cores = 4, thin = 1,
+                      chains = 4, cores = 4, thin = 1, seed=421,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
                       prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -109,7 +108,7 @@ era_SSH_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
 
 era_SST_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       data = dat[dat$key == "Sea surface temp. (Nov-Mar)", ],
-                      chains = 4, cores = 4, thin = 1,
+                      chains = 4, cores = 4, thin = 1, seed=421,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
                       prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -128,7 +127,7 @@ coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
 for(i in 1:length(unique(coef_indv_arm$key))) {
-
+i <- 1
   sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
@@ -147,6 +146,14 @@ lst.slope <- lapply(lst, function(x) {
 coef_slope <- plyr::rbind.fill(lst.slope)
 mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
+# calculate overlap in slopes
+for(i in 1:length(unique(coef_slope$key))) {
+  
+  sub = dplyr::filter(coef_slope, key == unique(coef_slope$key)[i])
+  # calculate pairwise overlaps in slopes and intercepts
+  int_overlap = overlapping::overlap(x = list(slope1 = sub$era1,slope2=sub$era2,slope3=sub$era3))
+  saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
+}
 
 int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
                        mean = mean(value),
@@ -177,8 +184,19 @@ png("era-specific PDO and climate.png", 6.5, 7.5, units='in', res=300)
 ggarrange(scatter, int, ncol=1, nrow=2, labels=c("a)", "b)"))
 dev.off()
 
+# plot slopes for SI
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
+  theme(legend.title = element_blank()) +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(slope)
 
-
+ggsave("era-specific climate slopes on PDO.png", width=6, height=4, units='in')
 ## Bayesian model diagnostics
 post_era_NPI_2    <- as.array(era_NPI_2)
 post_era_stress_2 <- as.array(era_stress_2)
@@ -233,34 +251,42 @@ scatter <- ggplot(dat, aes(NDJFM.PDO, value, color=plot.era)) +
 # rename pdo
 names(dat)[2] <- "pdo"
 
+# remove units for posterior plots
+
 #era as function
 dat$era <- as.factor(dat$era)
 
+# remove units from labels
+dat$key <- as.character(dat$key)
 
-## fit model with era-specific intercepts 
+change <- grep("GAK", dat$key)
+dat$key[change] <- "GAK1 salinity (Feb-Apr)"
 
-location <- mean(dat$value[dat$key == "Papa index (ºN, Dec-Feb)"])
+change <- grep("Papa", dat$key)
+dat$key[change] <- "Papa index (Dec-Feb)"
 
-era_Papa_2 <- stan_glm(value ~ era + pdo,
-                       data = dat[dat$key == "Papa index (ºN, Dec-Feb)", ],
-                       chains = 4, cores = 4, thin = 1,
-                       warmup = 1000, iter = 4000, refresh = 0,
-                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
-                       prior_intercept = normal(location = location, scale = 5, autoscale = FALSE),
-                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+dat$key <- factor(dat$key)
 
-location <- mean(dat$value[dat$key == "GAK1 salinity (psu, Feb-Apr)"])
+## fit a model with era-specific intercepts and slopes
 
-era_salinity_2 <- stan_glm(value ~ era + pdo,
-                           data = dat[dat$key == "GAK1 salinity (psu, Feb-Apr)", ],
-                           chains = 4, cores = 4, thin = 1,
-                           warmup = 1000, iter = 4000, refresh = 0,
-                           prior = normal(location = 0, scale = 5, autoscale = FALSE),
-                           prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
-                           prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+era_GAK_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
+                      data = dat[dat$key == "GAK1 salinity (Feb-Apr)", ],
+                      chains = 4, cores = 4, thin = 1, seed=421,
+                      warmup = 1000, iter = 4000, refresh = 0,
+                      prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                      prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+era_Papa_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
+                         data = dat[dat$key == "Papa index (Dec-Feb)", ],
+                         chains = 4, cores = 4, thin = 1, seed=421,
+                         warmup = 1000, iter = 4000, refresh = 0,
+                         prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                         prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                         prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 
-lst <- list(era_Papa_2, era_salinity_2)
+lst <- list(era_GAK_2, era_Papa_2)
 
 lst <- lapply(lst, function(x) {
   beta <- as.matrix(x, pars = c("(Intercept)", "era2", "era3"))
@@ -280,24 +306,67 @@ for(i in 1:length(unique(coef_indv_arm$key))) {
   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_int_overlap.rds"))
 }
 
+## extract slopes
+lst <- list(era_GAK_2, era_Papa_2)
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("pdo", "era2:pdo", "era3:pdo"))
+  data.frame(key = unique(x$data$key),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2],
+             era3 = beta[ , 1] + beta[ , 3])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
+# calculate overlap in slopes
+for(i in 1:length(unique(coef_slope$key))) {
+  
+  sub = dplyr::filter(coef_slope, key == unique(coef_slope$key)[i])
+  # calculate pairwise overlaps in slopes and intercepts
+  int_overlap = overlapping::overlap(x = list(slope1 = sub$era1,slope2=sub$era2,slope3=sub$era3))
+  saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
+}
 
-int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
+int_tab_neg <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
                        mean = mean(value),
                        lower95 = quantile(value, probs = 0.025),
                        upper95 = quantile(value, probs = 0.975))
 
+slope_tab_neg <- plyr::ddply(mdf_slope, .(key, variable), summarize,
+                         mean = mean(value),
+                         lower95 = quantile(value, probs = 0.025),
+                         upper95 = quantile(value, probs = 0.975))
 
-
+# plot intercepts
 int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   theme_bw() +
   geom_density(alpha = 0.7) +
   scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
   theme(legend.title = element_blank()) +
-  labs(x = "Intercept",
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Intercept (scaled anomaly)",
        y = "Posterior density") +
   facet_wrap( ~ key, scales="free")
 print(int)
+
+# plot slopes
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
+  theme(legend.title = element_blank()) +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(slope)
+
+# make a combined plot
+png("era-specific PDO and GAK1-Papa.png", 6.5, 7, units='in', res=300)
+ggarrange(scatter, int, slope, ncol=1, nrow=3, labels=c("a)", "b)", "c)"))
+dev.off()
+
+
 
 # make a combined plot
 library(ggpubr)
