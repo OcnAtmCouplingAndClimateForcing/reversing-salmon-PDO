@@ -20,19 +20,19 @@ dat <- dat %>%
   select(-Papa, -GAK1.sal)
 
 # now plot relative to PDO!
-colnames(dat)[c(2,3,5,6)] <- c("Sea surface height (m, Feb-Apr)",
-                               "Wind stress (pa, Feb-Apr)",
-                               "Sea surface temp. (ºC, Nov-Mar)",
-                             "North Pacific Index (mb, Nov-Mar)")
+colnames(dat)[c(2,3,5,6)] <- c("Sea surface height (m)",
+                               "Wind stress (pa)",
+                               "Sea surface temp. (ºC)",
+                             "North Pacific Index (mb)")
 dat <- dat %>%
   gather(key, value, -NDJFM.PDO, -era)
 
 dat$plot.era <- ifelse(dat$era==1, "1964-1988",
                        ifelse(dat$era==2, "1989-2013", "2014-2019"))
 
-dat$key.order <- ifelse(dat$key=="North Pacific Index (mb, Nov-Mar)", 1,
-                        ifelse(dat$key=="Sea surface temp. (ºC, Nov-Mar)", 2,
-                        ifelse(dat$key=="Sea surface height (m, Feb-Apr)", 3, 4)))
+dat$key.order <- ifelse(dat$key=="North Pacific Index (mb)", 1,
+                        ifelse(dat$key=="Sea surface temp. (ºC)", 2,
+                        ifelse(dat$key=="Sea surface height (m)", 3, 4)))
 
 dat$key <- reorder(dat$key, dat$key.order)
 
@@ -43,7 +43,7 @@ scatter <- ggplot(dat, aes(NDJFM.PDO, value, color=plot.era)) +
   scale_color_manual(values=cb[2:4]) +
   geom_smooth(method="lm", se=F) +
   xlab("PDO Index (Nov-Mar)") +
-  theme(legend.title = element_blank(), axis.title.y = element_blank())
+  theme(legend.title = element_blank(), axis.title.y = element_blank(), legend.position = 'top')
 
 ggsave("PDO vs NPI ssh sst stress.png", width = 5, height = 5, units="in")
 
@@ -66,16 +66,16 @@ dat$era <- as.factor(dat$era)
 dat$key <- as.character(dat$key)
 
 change <- grep("North P", dat$key)
-dat$key[change] <- "North Pacific Index (Nov-Mar)"
+dat$key[change] <- "North Pacific Index"
 
 change <- grep("Wind", dat$key)
-dat$key[change] <- "Wind stress (Feb-Apr)"
+dat$key[change] <- "Wind stress"
 
 change <- grep("height", dat$key)
-dat$key[change] <- "Sea surface height (Feb-Apr)"
+dat$key[change] <- "Sea surface height"
 
 change <- grep("temp", dat$key)
-dat$key[change] <- "Sea surface temp. (Nov-Mar)"
+dat$key[change] <- "Sea surface temp."
 
 dat$key <- factor(dat$key)
 dat$key <- reorder(dat$key, dat$key.order)
@@ -83,7 +83,7 @@ dat$key <- reorder(dat$key, dat$key.order)
 ## fit a model with era-specific intercepts and slopes
 
 era_NPI_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
-                      data = dat[dat$key == "North Pacific Index (Nov-Mar)", ],
+                      data = dat[dat$key == "North Pacific Index", ],
                       chains = 4, cores = 4, thin = 1, seed=421,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -91,7 +91,7 @@ era_NPI_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_stress_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
-                         data = dat[dat$key == "Wind stress (Feb-Apr)", ],
+                         data = dat[dat$key == "Wind stress", ],
                          chains = 4, cores = 4, thin = 1, seed=421,
                          warmup = 1000, iter = 4000, refresh = 0,
                          prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -99,7 +99,7 @@ era_stress_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                          prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_SSH_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
-                      data = dat[dat$key == "Sea surface height (Feb-Apr)", ],
+                      data = dat[dat$key == "Sea surface height", ],
                       chains = 4, cores = 4, thin = 1, seed=421,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -107,7 +107,7 @@ era_SSH_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
                       prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 era_SST_2 <- stan_glm(scale(value) ~ era + pdo + pdo:era,
-                      data = dat[dat$key == "Sea surface temp. (Nov-Mar)", ],
+                      data = dat[dat$key == "Sea surface temp.", ],
                       chains = 4, cores = 4, thin = 1, seed=421,
                       warmup = 1000, iter = 4000, refresh = 0,
                       prior = normal(location = 0, scale = 5, autoscale = FALSE),
@@ -126,12 +126,20 @@ lst <- lapply(lst, function(x) {
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
+intercept_overlap  <- data.frame()
+
 for(i in 1:length(unique(coef_indv_arm$key))) {
-i <- 1
+
   sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_int_overlap.rds"))
+  
+  intercept_overlap <- rbind(intercept_overlap, 
+                             data.frame(name=unique(coef_indv_arm$key)[i],
+                                        `int1-int2`=int_overlap$OV[1],
+                                        `int1-int3`=int_overlap$OV[2],
+                                        `int2-int3`=int_overlap$OV[3]))
 }
 
 ## extract slopes
@@ -147,12 +155,19 @@ coef_slope <- plyr::rbind.fill(lst.slope)
 mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
 # calculate overlap in slopes
+slope_overlap <- data.frame()
 for(i in 1:length(unique(coef_slope$key))) {
-  
+ 
   sub = dplyr::filter(coef_slope, key == unique(coef_slope$key)[i])
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(slope1 = sub$era1,slope2=sub$era2,slope3=sub$era3))
   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
+  
+  slope_overlap <- rbind(slope_overlap, 
+                             data.frame(name=unique(coef_indv_arm$key)[i],
+                                        `slope1-slope3`=int_overlap$OV[1],
+                                        `slope2-slope3`=int_overlap$OV[2],
+                                        `slope1-slope2`=int_overlap$OV[3]))
 }
 
 int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
@@ -170,7 +185,7 @@ int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   theme_bw() +
   geom_density(alpha = 0.7) +
   scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
-  theme(legend.title = element_blank()) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
   geom_vline(xintercept = 0, lty = 2) +
   labs(x = "Intercept (scaled anomaly)",
        y = "Posterior density") +
@@ -180,8 +195,9 @@ print(int)
 # make a combined plot
 library(ggpubr)
 
-png("era-specific PDO and climate.png", 6.5, 7.5, units='in', res=300)
-ggarrange(scatter, int, ncol=1, nrow=2, labels=c("a)", "b)"))
+png("era-specific PDO and climate.png", 8, 3.75, units='in', res=300)
+ggarrange(scatter, int, ncol=2, nrow=1, labels=c("a)", "b)"),
+          label.x = 0.05, label.y = 0.95)
 dev.off()
 
 # plot slopes for SI
