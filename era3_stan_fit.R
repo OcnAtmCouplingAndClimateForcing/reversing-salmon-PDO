@@ -513,7 +513,7 @@ slopes <- ggplot(mbeta, aes(x = value, fill = variable)) +
     scale_fill_manual(values = c(cb[2], cb[3], cb[4]),
                       labels=c("1965-1988", "1989-2013", "2014-2019")) +
     geom_vline(xintercept = 0, lty = 2) +
-    labs(x = "Slope",
+    labs(x = "Slope (scaled anomaly)",
          y = "Posterior density") +
     theme(legend.title = element_blank(), legend.position = 'top',
           legend.direction = "horizontal")
