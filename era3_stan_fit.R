@@ -480,6 +480,14 @@ era3_hier_arm <- stan_glmer(catch ~ era + pdo + pdo:era + (era + pdo + pdo:era |
                                              concentration = 1,
                                              shape = 1, scale = 1))
 
+# do predictions for recent era
+newdata = expand.grid("era"=unique(dat3$era),
+  pdo=c(mean(dat3$pdo[which(dat3$era=="era3")]),
+    mean(dat3$pdo[which(dat3$era=="era3")])+1), species=unique(dat3$species)) %>%
+  dplyr::filter(era=="era3")
+pred = posterior_predict(era3_hier_arm, newdata=newdata)
+newdata$mean_pred = round(apply(pred,2,mean), 3)
+
 fixef(era3_hier_arm)
 ranef(era3_hier_arm)
 coef(era3_hier_arm)
