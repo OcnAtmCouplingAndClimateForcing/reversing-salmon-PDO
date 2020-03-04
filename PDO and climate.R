@@ -331,7 +331,7 @@ mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
 # calculate overlap in slopes
 for(i in 1:length(unique(coef_slope$key))) {
-  i <- 2
+  # i <- 2
   sub = dplyr::filter(coef_slope, key == unique(coef_slope$key)[i])
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(slope1 = sub$era1,slope2=sub$era2,slope3=sub$era3))
