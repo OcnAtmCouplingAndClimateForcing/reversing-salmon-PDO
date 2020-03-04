@@ -126,7 +126,6 @@ lst <- lapply(lst, function(x) {
 coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
-intercept_overlap  <- data.frame()
 
 for(i in 1:length(unique(coef_indv_arm$key))) {
 
@@ -134,12 +133,7 @@ for(i in 1:length(unique(coef_indv_arm$key))) {
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_int_overlap.rds"))
-  
-  intercept_overlap <- rbind(intercept_overlap, 
-                             data.frame(name=unique(coef_indv_arm$key)[i],
-                                        `int1-int2`=int_overlap$OV[1],
-                                        `int1-int3`=int_overlap$OV[2],
-                                        `int2-int3`=int_overlap$OV[3]))
+
 }
 
 ## extract slopes
@@ -155,7 +149,7 @@ coef_slope <- plyr::rbind.fill(lst.slope)
 mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
 # calculate overlap in slopes
-slope_overlap <- data.frame()
+
 for(i in 1:length(unique(coef_slope$key))) {
  
   sub = dplyr::filter(coef_slope, key == unique(coef_slope$key)[i])
@@ -163,11 +157,7 @@ for(i in 1:length(unique(coef_slope$key))) {
   int_overlap = overlapping::overlap(x = list(slope1 = sub$era1,slope2=sub$era2,slope3=sub$era3))
   saveRDS(int_overlap$OV,file=paste0(sub$key[1], "_climate_slope_overlap.rds"))
   
-  slope_overlap <- rbind(slope_overlap, 
-                             data.frame(name=unique(coef_indv_arm$key)[i],
-                                        `slope1-slope3`=int_overlap$OV[1],
-                                        `slope2-slope3`=int_overlap$OV[2],
-                                        `slope1-slope2`=int_overlap$OV[3]))
+
 }
 
 int_tab <- plyr::ddply(mdf_indv_arm, .(key, variable), summarize,
@@ -180,6 +170,10 @@ slope_tab <- plyr::ddply(mdf_slope, .(key, variable), summarize,
                          lower95 = quantile(value, probs = 0.025),
                          upper95 = quantile(value, probs = 0.975))
 
+
+write.csv(int_tab, "climate intercept table.csv")
+
+write.csv(slope_tab, "climate slope table.csv")
 
 int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   theme_bw() +
@@ -213,6 +207,7 @@ slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
 print(slope)
 
 ggsave("era-specific climate slopes on PDO.png", width=6, height=4, units='in')
+
 ## Bayesian model diagnostics
 post_era_NPI_2    <- as.array(era_NPI_2)
 post_era_stress_2 <- as.array(era_stress_2)
@@ -315,7 +310,7 @@ coef_indv_arm <- plyr::rbind.fill(lst)
 mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
 
 for(i in 1:length(unique(coef_indv_arm$key))) {
-  
+  # i <- 1
   sub = dplyr::filter(coef_indv_arm, key == unique(coef_indv_arm$key)[i])
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(int1 = sub$era1,int2=sub$era2,int3=sub$era3))
@@ -336,7 +331,7 @@ mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
 
 # calculate overlap in slopes
 for(i in 1:length(unique(coef_slope$key))) {
-  
+  i <- 2
   sub = dplyr::filter(coef_slope, key == unique(coef_slope$key)[i])
   # calculate pairwise overlaps in slopes and intercepts
   int_overlap = overlapping::overlap(x = list(slope1 = sub$era1,slope2=sub$era2,slope3=sub$era3))
