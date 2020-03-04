@@ -31,10 +31,11 @@ ggplot(plot.dat, aes(PDO, mean.catch, color=era)) +
   theme_bw() +
   geom_point() +
   geom_smooth(method="lm", se=F) +
-  theme(legend.title = element_blank(), legend.position = c(0.78, 0.2)) +
+  theme(legend.title = element_blank(), legend.position = c(0.78, 0.2),
+        axis.text.y = element_blank()) +
   scale_color_manual(values=cb[c(2,3)]) +
   xlab("PDO") +
-  ylab("Catch anomaly")
+  ylab("Catch")
 
 ggsave("AMSS two-era catch vs PDO.png", width=3, height=2.5, units='in')
 
@@ -244,7 +245,7 @@ scatter <- ggplot(dat3) +
 print(scatter)
 
 # and the same plot for SST for another talk!
-scatter <- ggplot(dat3) +
+scatter.sst <- ggplot(dat3) +
   aes(x = sst, y = catch, color = species) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
@@ -253,7 +254,7 @@ scatter <- ggplot(dat3) +
   theme_bw() + ylab("Catch anomaly") + xlab("Winter sea surface temperature (ºF)") +
   theme(legend.title = element_blank(), legend.position = 'top')
 
-print(scatter)
+print(scatter.sst)
 
 ggsave("three panel catch and sst by era.png", width=5, height=3, units='in')
 
@@ -500,9 +501,25 @@ mbeta  <- reshape2::melt(coef_beta, id.vars = "coef")
 malpha <- reshape2::melt(coef_alpha, id.vars = "coef")
 mdf_hier <- rbind(mbeta, malpha)
 
+
+era_mean_slopes <- mbeta %>%
+  group_by(variable) %>%
+  summarize(mean=mean(value))
+
+era_mean_slopes[3,2] - era_mean_slopes[2,2]
+era_mean_slopes[3,2] - era_mean_slopes[1,2]
+
+# and % positive / negative slopes by era!
+sum(mbeta$value[mbeta$variable=="era1"]>0)/ length(mbeta$value[mbeta$variable=="era1"])
+sum(mbeta$value[mbeta$variable=="era2"]>0)/ length(mbeta$value[mbeta$variable=="era2"])
+sum(mbeta$value[mbeta$variable=="era3"]>0)/ length(mbeta$value[mbeta$variable=="era3"])
+
 # calculate pairwise overlaps in slopes and intercepts
 slope_overlap = overlapping::overlap(x = list(slope1 = mu_beta[,1],slope2=mu_beta[,2],slope3=mu_beta[,3]))
 int_overlap = overlapping::overlap(x = list(int1 = mu_alpha[ , 1],int2=mu_alpha[ , 2],int3=mu_alpha[ , 3]))
+
+
+
 
 saveRDS(int_overlap$OV,file="salmon_int_overlap.rds")
 saveRDS(slope_overlap$OV,file="salmon_slope_overlap.rds")
@@ -522,7 +539,7 @@ print(slopes)
 
 
 png("era-specific catches and PDO.png", 8, 3, units='in', res=300)
-ggpubr::ggarrange(scatter, slopes, ncol=2, nrow=1, labels=c("a)", "b)"), widths = c(1, 0.7))
+ggpubr::ggarrange(scatter, slopes, ncol=2, nrow=1, labels=c("a)", "b)"), widths = c(1, 0.7), label.y = 0.95)
 dev.off()
 
 
