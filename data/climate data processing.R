@@ -498,7 +498,7 @@ png("study site figure.png", 8,5.5, units="in", res=300)
 par(mfrow=c(2,2), tcl=-0.2, cex.lab=0.8, cex.axis=0.8, mar=c(1,2,1,0.5),mgp=c(1.5,0.3,0), oma=c(0,0,0,2))
 mt.cex <- 1.1
 l.mar <- 3
-l.cex <- 1.1
+l.cex <- 1.3
 l.l <- 0.1
 land.col <- "lightyellow3"
 xlim <- c(190, 233)
@@ -514,7 +514,7 @@ gak.y <- 59 + (50.7/60)
 gak.x <- 360-149 + (28/60)
 points(gak.x, gak.y, pch=21, bg="#CC79A7", col="black", cex=1.7)
 text(gak.x+4, gak.y-0.2, "GAK1", col="#CC79A7", cex=1.2)
-mtext("a) Wind stress (Pa) and GAK1 site", adj=0, cex=0.8)
+mtext("a) Wind stress (Pa) and GAK1 site", adj=0, cex=1)
 
 
 z <- t(matrix(plot.ssh,length(y.ssh)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
@@ -522,7 +522,7 @@ image.plot(x.ssh,y.ssh,z, col=new.col, zlim=c(-0.181, 0.181), yaxt="n", xaxt="n"
 map('world2Hires', c('Canada', 'usa'), fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col=land.col)
 points(360-145,50, pch=21, bg="#56B4E9", col="black", cex=1.5)
 text(360-145, 50, "Ocean Station Papa ", pos=2, cex=1.2, col="#56B4E9")
-mtext("b) Sea surface height (m) and Ocean Station Papa", adj=0, cex=0.8)
+mtext("b) Sea surface height (m) and Ocean Station Papa", adj=0, cex=1)
 
 
 z <- t(matrix(colMeans(SST), length(sst.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
@@ -530,7 +530,7 @@ image.plot(sst.x,sst.y,z, col=new.col, yaxt="n", xaxt="n", xlim=xlim, ylim=ylim,
 box()
 map('world2Hires', c('Canada', 'usa'), fill=T,xlim=c(130,250), ylim=c(20,70),add=T, lwd=0.5, col=land.col)
 
-mtext("c) Sea surface temperature (°C)", adj=0, cex=0.8)
+mtext("c) Sea surface temperature (°C)", adj=0, cex=1)
 
 # location...
 # study site box
@@ -552,5 +552,5 @@ lines(npi.x,npi.y, lwd=2, col="#0072B2")
 
 text(130, 24, "Study site", cex=1.2, col="#D55E00", pos=4)
 text(130, 20.5, "North Pacific Index", cex=1.2, col="#0072B2", pos=4)
-mtext("d) Study site and North Pacific Index", adj=0, cex=0.8)
+mtext("d) Study site and North Pacific Index", adj=0, cex=1)
 dev.off()
