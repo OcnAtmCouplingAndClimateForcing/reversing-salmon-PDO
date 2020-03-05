@@ -19,7 +19,6 @@ nc <- nc_open("/Users/MikeLitzow/Documents/R/climate-data/data/North.Pacific.ers
 
 # process sst first
 # extract dates
-
 ncvar_get(nc, "time")   # seconds since 1-1-1970
 raw <- ncvar_get(nc, "time")
 h <- raw/(24*60*60)
